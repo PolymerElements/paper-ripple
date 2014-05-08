@@ -1,0 +1,7 @@
+{
+  "name": "paper-ripple",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#master"
+  }
+}

@@ -1,0 +1,350 @@
+<!--
+Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!--
+`paper-ripple` provides Touch Ripple effect.
+
+@group Quantum Paper Elements
+@element paper-ripple
+@homepage github.io
+-->
+
+<link rel="import" href="../polymer/polymer.html" >
+
+<polymer-element name="paper-ripple">
+
+<template>
+
+  <style>
+  
+    :host {
+      display: block;
+      position: relative;
+    }
+    
+    #canvas {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    
+    :host(.circle) #canvas {
+      border-radius: 50%;
+    }
+    
+  </style>
+  
+  <canvas id="canvas" on-down="{{downAction}}" on-up="{{upAction}}"></canvas>
+
+</template>
+<script>
+
+  (function() {
+    
+    //
+    // INK EQUATIONS
+    //
+    
+    // Animation constants.
+    var globalSpeed = 1.0;
+    var waveTouchDownAcceleration = 512.0 * globalSpeed;  // px per second^2.
+    var waveTouchUpAcceleration = 1024.0 * globalSpeed;
+    var waveOpacityDecayVelocity = 0.5 / globalSpeed;  // opacity per second.
+    var waveInitialOpacity = 0.25;
+    var waveLingerOnTouchUp = 0.2;
+    
+    function waveRadiusFn(touchDownMs, touchUpMs) {
+      // Convert from ms to s.
+      var touchDown = touchDownMs / 1000;
+      var touchUp = touchUpMs / 1000;
+      var totalElapsed = touchDown + touchUp;
+    
+      // Outdated equation: distance travelled = a * t^2 + v(initial)
+      var distanceOnDown = waveTouchDownAcceleration * pow(totalElapsed, 2);
+    
+      // Accelerate faster on touch up
+      var distanceOnUp = waveTouchUpAcceleration * (pow(touchUp, 2));
+      return distanceOnDown + distanceOnUp;
+    }
+    
+    function waveOpacityFn(td, tu) {
+      // Convert from ms to s.
+      var touchDown = td / 1000;
+      var touchUp = tu / 1000;
+      var totalElapsed = touchDown + touchUp;
+    
+      if (tu <= 0) {  // before touch up
+        return waveInitialOpacity;
+      }
+      return Math.max(0, waveInitialOpacity - touchUp * waveOpacityDecayVelocity);
+    }
+    
+    function waveOuterOpacityFn(td, tu) {
+      // Convert from ms to s.
+      var touchDown = td / 1000;
+      var touchUp = tu / 1000;
+    
+      // Linear increase in background opacity, capped at the opacity
+      // of the wavefront (waveOpacity).
+      var outerOpacity = touchDown * 0.3;
+      var waveOpacity = waveOpacityFn(td, tu);
+      return Math.max(0, Math.min(outerOpacity, waveOpacity));
+    }
+    
+    function waveGravityToCenterPercentageFn(td, tu, r) {
+      // Convert from ms to s.
+      var touchDown = td / 1000;
+      var touchUp = tu / 1000;
+      var totalElapsed = touchDown + touchUp;
+    
+      return Math.min(1.0, touchUp * 6);
+    }
+    
+    // Determines whether the wave should be completely removed.
+    function waveDidFinish(wave, radius) {
+      var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp);
+      // Does not linger any more.
+      // var lingerTimeMs = waveLingerOnTouchUp * 1000;
+    
+      // If the wave opacity is 0 and the radius exceeds the bounds
+      // of the element, then this is finished.
+      if (waveOpacity < 0.01 && radius >= wave.maxRadius) {
+        return true;
+      }
+      return false;
+    };
+    
+    //
+    // DRAWING
+    //
+    function drawRipple(canvas, x, y, radius, innerColor, outerColor, innerColorAlpha, outerColorAlpha) {
+      var ctx = canvas.getContext('2d');
+      if (outerColor) {
+        ctx.fillStyle = outerColor;
+        ctx.fillRect(0,0,canvas.width, canvas.height);
+      }
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+      ctx.fillStyle = innerColor;
+      ctx.fill();
+    }
+    
+    //
+    // SETUP
+    //
+    function createWave(elem) {
+      var elementStyle = window.getComputedStyle(elem);
+      var fgColor = elementStyle.color;
+    
+      var wave = {
+        waveColor: fgColor,
+        maxRadius: 0,
+        isMouseDown: false,
+        mouseDownStart: 0.0,
+        mouseUpStart: 0.0,
+        tDown: 0,
+        tUp: 0
+      };
+      return wave;
+    }
+    
+    function removeWaveFromScope(scope, wave) {
+      if (scope.waves) {
+        var pos = scope.waves.indexOf(wave);
+        scope.waves.splice(pos, 1);
+      }
+    };
+    
+    // Shortcuts.
+    var pow = Math.pow;
+    var now = function() { return new Date().getTime(); };
+    
+    // Quad beizer where t is between 0 and 1.
+    function quadBezier(t, p0, p1, p2, p3) {
+      return pow(1 - t, 3) * p0 +
+             3 * pow(1 - t, 2) * t * p1 +
+             (1 - t) * pow(t, 2) * p2 +
+             pow(t, 3) * p3;
+    }
+    
+    function easeIn(t) {
+      return quadBezier(t, 0.4, 0.0, 1, 1);
+    }
+    
+    function cssColorWithAlpha(cssColor, alpha) {
+        var parts = cssColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+        if (typeof alpha == 'undefined') {
+            alpha = 1;
+        }
+        if (!parts) {
+          return 'rgba(255, 255, 255, ' + alpha + ')';
+        }
+        return 'rgba(' + parts[1] + ', ' + parts[2] + ', ' + parts[3] + ', ' + alpha + ')';
+    }
+    
+    function dist(p1, p2) {
+      return Math.sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
+    }
+    
+    function distanceFromPointToFurthestCorner(point, size) {
+      var tl_d = dist(point, {x: 0, y: 0});
+      var tr_d = dist(point, {x: size.w, y: 0});
+      var bl_d = dist(point, {x: 0, y: size.h});
+      var br_d = dist(point, {x: size.w, y: size.h});
+      return Math.max(Math.max(tl_d, tr_d), Math.max(bl_d, br_d));
+    }
+    
+    Polymer('paper-ripple', {
+      
+      backgroundFill: true,
+      pixelDensity: 2,
+      
+      ready: function() {
+        this.waves = [];
+      },
+  
+      setupCanvas: function() {
+        this.$.canvas.setAttribute('width', this.$.canvas.clientWidth * this.pixelDensity + "px");
+        this.$.canvas.setAttribute('height', this.$.canvas.clientHeight * this.pixelDensity + "px");
+        this.$.canvas.getContext('2d').scale(this.pixelDensity, this.pixelDensity);
+      },
+      
+      downAction: function(e) {
+        this.setupCanvas();
+        var wave = createWave(this.$.canvas);
+    
+        wave.isMouseDown = true;
+        wave.tDown = 0.0;
+        wave.tUp = 0.0;
+        wave.mouseUpStart = 0.0;
+        wave.mouseDownStart = now();
+    
+        var width = this.$.canvas.width / 2; // Retina canvas
+        var height = this.$.canvas.height / 2;
+        var rect = this.getBoundingClientRect();
+        var touchX = e.x - rect.left;
+        var touchY = e.y - rect.top;
+        
+        wave.startPosition = {x:touchX, y:touchY};
+    
+        if (this.classList.contains("recenteringTouch")) {
+          wave.endPosition = {x: width / 2,  y: height / 2};
+          wave.slideDistance = dist(wave.startPosition, wave.endPosition);
+        }
+        wave.containerSize = Math.max(width, height);
+        wave.maxRadius = distanceFromPointToFurthestCorner(wave.startPosition, {w: width, h: height});
+        this.waves.push(wave);
+        requestAnimationFrame(this.animate.bind(this));
+      },
+      
+      upAction: function() {
+        for (var i = 0; i < this.waves.length; i++) {
+          // Declare the next wave that has mouse down to be mouse'ed up.
+          var wave = this.waves[i];
+          if (wave.isMouseDown) {
+            wave.isMouseDown = false
+            wave.mouseUpStart = now();
+            wave.mouseDownStart = 0;
+            wave.tUp = 0.0;
+            break;
+          }
+        }
+      },
+      
+      animate: function() {
+        var shouldRenderNextFrame = false;
+
+        // Clear the canvas
+        var ctx = this.$.canvas.getContext('2d');
+        ctx.clearRect(0, 0, this.$.canvas.width, this.$.canvas.height);
+    
+        var deleteTheseWaves = [];
+        // The oldest wave's touch down duration
+        var longestTouchDownDuration = 0;
+        var longestTouchUpDuration = 0;
+        // Save the last known wave color
+        var lastWaveColor = null;
+    
+        for (var i = 0; i < this.waves.length; i++) {
+          var wave = this.waves[i];
+    
+          if (wave.mouseDownStart > 0) {
+            wave.tDown = now() - wave.mouseDownStart;
+          }
+          if (wave.mouseUpStart > 0) {
+            wave.tUp = now() - wave.mouseUpStart;
+          }
+    
+          // Determine how long the touch has been up or down.
+          var tUp = wave.tUp;
+          var tDown = wave.tDown;
+          longestTouchDownDuration = Math.max(longestTouchDownDuration, tDown);
+          longestTouchUpDuration = Math.max(longestTouchUpDuration, tUp);
+    
+          // Obtain the instantenous size and alpha of the ripple.
+          var radius = waveRadiusFn(tDown, tUp);
+          var waveAlpha =  waveOpacityFn(tDown, tUp);
+          var waveColor = cssColorWithAlpha(wave.waveColor, waveAlpha);
+          lastWaveColor = wave.waveColor;
+    
+          // Position of the ripple.
+          var x = wave.startPosition.x;
+          var y = wave.startPosition.y;
+    
+          // Ripple gravitational pull to the center of the canvas.
+          if (wave.endPosition) {
+     
+            var translateFraction = waveGravityToCenterPercentageFn(tDown, tUp, wave.maxRadius);
+    
+            // This translates from the origin to the center of the view  based on the max dimension of  
+            var translateFraction = Math.min(1, radius / wave.containerSize * 2 / Math.sqrt(2) );
+    
+            x += translateFraction * (wave.endPosition.x - wave.startPosition.x);
+            y += translateFraction * (wave.endPosition.y - wave.startPosition.y);
+          }
+    
+          // If we do a background fill fade too, work out the correct color.
+          var bgFillColor = null;
+          if (this.backgroundFill) {
+            var bgFillAlpha = waveOuterOpacityFn(tDown, tUp);
+            bgFillColor = cssColorWithAlpha(wave.waveColor, bgFillAlpha);
+          }
+    
+          // Draw the ripple.
+          drawRipple(this.$.canvas, x, y, radius, waveColor, bgFillColor);
+    
+          // Determine whether there is any more rendering to be done.
+          var shouldRenderWaveAgain = !waveDidFinish(wave, radius);
+          shouldRenderNextFrame = shouldRenderNextFrame || shouldRenderWaveAgain;
+          if (!shouldRenderWaveAgain) {
+            deleteTheseWaves.push(wave);
+          }
+       }
+    
+        if (shouldRenderNextFrame) {
+          requestAnimationFrame(this.animate.bind(this));
+        }  else {
+          // If there is nothing to draw, clear any drawn waves now because
+          // we're not going to get another requestAnimationFrame any more.
+          var ctx = this.$.canvas.getContext('2d');
+          ctx.clearRect(0, 0, this.$.canvas.width, this.$.canvas.height);
+        }
+    
+        for (var i = 0; i < deleteTheseWaves.length; ++i) {
+          var wave = deleteTheseWaves[i];
+          removeWaveFromScope(this, wave);
+        }
+      }
+  
+    });
+    
+  })();
+    
+</script>
+</polymer-element>
