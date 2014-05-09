@@ -2,8 +2,8 @@
   "name": "paper-ripple",
   "private": true,
   "dependencies": {
-    "font-roboto2": "Polymer/font-roboto2#master",
+    "core-icon": "Polymer/core-icon#master",
     "core-icons": "Polymer/core-icons#master",
-    "core-icon": "Polymer/core-icon#master"
+    "font-roboto2": "Polymer/font-roboto2#master"
   }
 }
