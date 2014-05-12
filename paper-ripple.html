@@ -59,7 +59,7 @@ Apply `circle` class to make the rippling effect within a circle.
 
 <link rel="import" href="../polymer/polymer.html" >
 
-<polymer-element name="paper-ripple">
+<polymer-element name="paper-ripple" attributes="initialOpacity opacityDecayVelocity touchDownAcceleration touchUpAcceleration">
 <template>
 
   <style>
@@ -83,7 +83,7 @@ Apply `circle` class to make the rippling effect within a circle.
     
   </style>
   
-  <canvas id="canvas" on-down="{{downAction}}" on-up="{{upAction}}"></canvas>
+  <canvas id="canvas"></canvas>
 
 </template>
 <script>
@@ -93,42 +93,33 @@ Apply `circle` class to make the rippling effect within a circle.
     //
     // INK EQUATIONS
     //
-    
-    // Animation constants.
-    var globalSpeed = 1.0;
-    var waveTouchDownAcceleration = 512.0 * globalSpeed;  // px per second^2.
-    var waveTouchUpAcceleration = 1024.0 * globalSpeed;
-    var waveOpacityDecayVelocity = 0.5 / globalSpeed;  // opacity per second.
-    var waveInitialOpacity = 0.25;
-    var waveLingerOnTouchUp = 0.2;
-    
-    function waveRadiusFn(touchDownMs, touchUpMs) {
+    function waveRadiusFn(touchDownMs, touchUpMs, anim) {
       // Convert from ms to s.
       var touchDown = touchDownMs / 1000;
       var touchUp = touchUpMs / 1000;
       var totalElapsed = touchDown + touchUp;
     
       // Outdated equation: distance travelled = a * t^2 + v(initial)
-      var distanceOnDown = waveTouchDownAcceleration * pow(totalElapsed, 2);
+      var distanceOnDown = anim.touchDownAcceleration * pow(totalElapsed, 2);
     
       // Accelerate faster on touch up
-      var distanceOnUp = waveTouchUpAcceleration * (pow(touchUp, 2));
+      var distanceOnUp = anim.touchUpAcceleration * (pow(touchUp, 2));
       return distanceOnDown + distanceOnUp;
     }
     
-    function waveOpacityFn(td, tu) {
+    function waveOpacityFn(td, tu, anim) {
       // Convert from ms to s.
       var touchDown = td / 1000;
       var touchUp = tu / 1000;
       var totalElapsed = touchDown + touchUp;
     
       if (tu <= 0) {  // before touch up
-        return waveInitialOpacity;
+        return anim.initialOpacity;
       }
-      return Math.max(0, waveInitialOpacity - touchUp * waveOpacityDecayVelocity);
+      return Math.max(0, anim.initialOpacity - touchUp * anim.opacityDecayVelocity);
     }
     
-    function waveOuterOpacityFn(td, tu) {
+    function waveOuterOpacityFn(td, tu, anim) {
       // Convert from ms to s.
       var touchDown = td / 1000;
       var touchUp = tu / 1000;
@@ -136,7 +127,7 @@ Apply `circle` class to make the rippling effect within a circle.
       // Linear increase in background opacity, capped at the opacity
       // of the wavefront (waveOpacity).
       var outerOpacity = touchDown * 0.3;
-      var waveOpacity = waveOpacityFn(td, tu);
+      var waveOpacity = waveOpacityFn(td, tu, anim);
       return Math.max(0, Math.min(outerOpacity, waveOpacity));
     }
     
@@ -150,11 +141,8 @@ Apply `circle` class to make the rippling effect within a circle.
     }
     
     // Determines whether the wave should be completely removed.
-    function waveDidFinish(wave, radius) {
-      var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp);
-      // Does not linger any more.
-      // var lingerTimeMs = waveLingerOnTouchUp * 1000;
-    
+    function waveDidFinish(wave, radius, anim) {
+      var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp, anim);
       // If the wave opacity is 0 and the radius exceeds the bounds
       // of the element, then this is finished.
       if (waveOpacity < 0.01 && radius >= wave.maxRadius) {
@@ -245,8 +233,49 @@ Apply `circle` class to make the rippling effect within a circle.
     
     Polymer('paper-ripple', {
       
+      /**
+       * The initial opacity set on the wave.
+       *
+       * @attribute initialOpacity
+       * @type number
+       * @default 0.25
+       */
+      initialOpacity: 0.25,
+      
+      /**
+       * How fast (opacity per second) the wave fades out.
+       *
+       * @attribute opacityDecayVelocity
+       * @type number
+       * @default 0.5
+       */
+      opacityDecayVelocity: 0.5,
+      
+      /**
+       * Touch down acceleration (px per second^2).
+       *
+       * @attribute touchDownAcceleration
+       * @type number
+       * @default 512.0
+       */
+      touchDownAcceleration: 512.0,
+      
+      /**
+       * Touch up acceleration (px per second^2).
+       *
+       * @attribute touchUpAcceleration
+       * @type number
+       * @default 1024.0
+       */
+      touchUpAcceleration: 1024.0,
+      
       backgroundFill: true,
       pixelDensity: 2,
+      
+      eventDelegates: {
+        down: 'downAction',
+        up: 'upAction'
+      },
       
       ready: function() {
         this.waves = [];
@@ -261,7 +290,8 @@ Apply `circle` class to make the rippling effect within a circle.
       downAction: function(e) {
         this.setupCanvas();
         var wave = createWave(this.$.canvas);
-    
+        
+        this.cancelled = false;
         wave.isMouseDown = true;
         wave.tDown = 0.0;
         wave.tUp = 0.0;
@@ -300,6 +330,10 @@ Apply `circle` class to make the rippling effect within a circle.
         }
       },
       
+      cancel: function() {
+        this.cancelled = true;
+      },
+      
       animate: function() {
         var shouldRenderNextFrame = false;
 
@@ -313,6 +347,13 @@ Apply `circle` class to make the rippling effect within a circle.
         var longestTouchUpDuration = 0;
         // Save the last known wave color
         var lastWaveColor = null;
+        // wave animation values
+        var anim = {
+          initialOpacity: this.initialOpacity,
+          opacityDecayVelocity: this.opacityDecayVelocity,
+          touchDownAcceleration: this.touchDownAcceleration,
+          touchUpAcceleration: this.touchUpAcceleration,
+        }
     
         for (var i = 0; i < this.waves.length; i++) {
           var wave = this.waves[i];
@@ -331,8 +372,8 @@ Apply `circle` class to make the rippling effect within a circle.
           longestTouchUpDuration = Math.max(longestTouchUpDuration, tUp);
     
           // Obtain the instantenous size and alpha of the ripple.
-          var radius = waveRadiusFn(tDown, tUp);
-          var waveAlpha =  waveOpacityFn(tDown, tUp);
+          var radius = waveRadiusFn(tDown, tUp, anim);
+          var waveAlpha =  waveOpacityFn(tDown, tUp, anim);
           var waveColor = cssColorWithAlpha(wave.waveColor, waveAlpha);
           lastWaveColor = wave.waveColor;
     
@@ -355,7 +396,7 @@ Apply `circle` class to make the rippling effect within a circle.
           // If we do a background fill fade too, work out the correct color.
           var bgFillColor = null;
           if (this.backgroundFill) {
-            var bgFillAlpha = waveOuterOpacityFn(tDown, tUp);
+            var bgFillAlpha = waveOuterOpacityFn(tDown, tUp, anim);
             bgFillColor = cssColorWithAlpha(wave.waveColor, bgFillAlpha);
           }
     
@@ -363,9 +404,9 @@ Apply `circle` class to make the rippling effect within a circle.
           drawRipple(this.$.canvas, x, y, radius, waveColor, bgFillColor);
     
           // Determine whether there is any more rendering to be done.
-          var shouldRenderWaveAgain = !waveDidFinish(wave, radius);
+          var shouldRenderWaveAgain = !waveDidFinish(wave, radius, anim);
           shouldRenderNextFrame = shouldRenderNextFrame || shouldRenderWaveAgain;
-          if (!shouldRenderWaveAgain) {
+          if (!shouldRenderWaveAgain || this.cancelled) {
             deleteTheseWaves.push(wave);
           }
        }
