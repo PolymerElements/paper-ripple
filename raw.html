@@ -8,25 +8,28 @@
 //
 
 // Animation constants.
-var globalSpeed = 1.0;
-var waveTouchDownAcceleration = 512.0 * globalSpeed;  // px per second^2.
-var waveTouchUpAcceleration = 1024.0 * globalSpeed;
-var waveOpacityDecayVelocity = 0.5 / globalSpeed;  // opacity per second.
+var globalSpeed = 1;
+var waveOpacityDecayVelocity = 0.8 / globalSpeed;  // opacity per second.
 var waveInitialOpacity = 0.25;
 var waveLingerOnTouchUp = 0.2;
+var waveMaxRadius = 150; 
 
-function waveRadiusFn(touchDownMs, touchUpMs) {
+// TODOs:
+// - rather than max distance to corner, use hypotenuos(sp) (diag)
+// - use quadratic for the fall off, move fast at the beginning, 
+// - on cancel, immediately fade out, reverse the direction
+
+function waveRadiusFn(touchDownMs, touchUpMs, ww, hh) {
   // Convert from ms to s.
   var touchDown = touchDownMs / 1000;
   var touchUp = touchUpMs / 1000;
   var totalElapsed = touchDown + touchUp;
-
-  // Outdated equation: distance travelled = a * t^2 + v(initial)
-  var distanceOnDown = waveTouchDownAcceleration * pow(totalElapsed, 2);
-
-  // Accelerate faster on touch up
-  var distanceOnUp = waveTouchUpAcceleration * (pow(touchUp, 2));
-  return  distanceOnDown + distanceOnUp;
+  var waveRadius = Math.min(Math.max(ww, hh), waveMaxRadius) * 1.1 + 5;
+  var dduration = 1.1 - .2 * (waveRadius / waveMaxRadius);
+  var tt = (totalElapsed / dduration);
+  
+  var ssize = waveRadius * (1 - Math.pow(80, -tt));
+  return Math.abs(ssize);
 }
 
 function waveOpacityFn(td, tu) {
@@ -219,7 +222,7 @@ function setUpPaper(elem) {
       longestTouchUpDuration = Math.max(longestTouchUpDuration, tUp);
 
       // Obtain the instantenous size and alpha of the ripple.
-      var radius = waveRadiusFn(tDown, tUp);
+      var radius = waveRadiusFn(tDown, tUp, elem.width, elem.height);
       var waveAlpha =  waveOpacityFn(tDown, tUp);
       var waveColor = cssColorWithAlpha(wave.waveColor, waveAlpha);
       lastWaveColor = wave.waveColor;
