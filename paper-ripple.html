@@ -146,20 +146,27 @@ Apply `circle` class to make the rippling effect within a circle.
       var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp, anim);
       // If the wave opacity is 0 and the radius exceeds the bounds
       // of the element, then this is finished.
-      if (waveOpacity < 0.01 || radius >= Math.min(wave.maxRadius, waveMaxRadius)) {
+      if (waveOpacity < 0.01 && radius >= Math.min(wave.maxRadius, waveMaxRadius)) {
         return true;
       }
       return false;
     };
 
+    function waveAtMaximum(wave, radius, anim) {
+      var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp, anim);
+      if (waveOpacity >= anim.initialOpacity && radius >= Math.min(wave.maxRadius, waveMaxRadius)) {
+        return true;
+      }
+      return false;
+    }
+
     //
     // DRAWING
     //
-    function drawRipple(canvas, x, y, radius, innerColor, outerColor, innerColorAlpha, outerColorAlpha) {
-      var ctx = canvas.getContext('2d');
+    function drawRipple(ctx, x, y, radius, innerColor, outerColor, innerColorAlpha, outerColorAlpha) {
       if (outerColor) {
         ctx.fillStyle = outerColor;
-        ctx.fillRect(0,0,canvas.width, canvas.height);
+        ctx.fillRect(0,0,ctx.canvas.width, ctx.canvas.height);
       }
       ctx.beginPath();
       ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
@@ -258,7 +265,11 @@ Apply `circle` class to make the rippling effect within a circle.
       setupCanvas: function() {
         this.$.canvas.setAttribute('width', this.$.canvas.clientWidth * this.pixelDensity + "px");
         this.$.canvas.setAttribute('height', this.$.canvas.clientHeight * this.pixelDensity + "px");
-        this.$.canvas.getContext('2d').scale(this.pixelDensity, this.pixelDensity);
+        var ctx = this.$.canvas.getContext('2d');
+        ctx.scale(this.pixelDensity, this.pixelDensity);
+        if (!this._loop) {
+          this._loop = this.animate.bind(this, ctx);
+        }
       },
 
       downAction: function(e) {
@@ -287,7 +298,7 @@ Apply `circle` class to make the rippling effect within a circle.
         wave.containerSize = Math.max(width, height);
         wave.maxRadius = distanceFromPointToFurthestCorner(wave.startPosition, {w: width, h: height});
         this.waves.push(wave);
-        requestAnimationFrame(this.animate.bind(this));
+        requestAnimationFrame(this._loop);
       },
 
       upAction: function() {
@@ -302,18 +313,18 @@ Apply `circle` class to make the rippling effect within a circle.
             break;
           }
         }
+        this._loop && requestAnimationFrame(this._loop);
       },
 
       cancel: function() {
         this.cancelled = true;
       },
 
-      animate: function() {
+      animate: function(ctx) {
         var shouldRenderNextFrame = false;
 
         // Clear the canvas
-        var ctx = this.$.canvas.getContext('2d');
-        ctx.clearRect(0, 0, this.$.canvas.width, this.$.canvas.height);
+        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
         var deleteTheseWaves = [];
         // The oldest wave's touch down duration
@@ -375,28 +386,33 @@ Apply `circle` class to make the rippling effect within a circle.
           }
 
           // Draw the ripple.
-          drawRipple(this.$.canvas, x, y, radius, waveColor, bgFillColor);
+          drawRipple(ctx, x, y, radius, waveColor, bgFillColor);
 
           // Determine whether there is any more rendering to be done.
-          var shouldRenderWaveAgain = !waveDidFinish(wave, radius, anim);
+          var maximumWave = waveAtMaximum(wave, radius, anim);
+          var waveDissipated = waveDidFinish(wave, radius, anim);
+          var shouldKeepWave = !waveDissipated || maximumWave;
+          var shouldRenderWaveAgain = !waveDissipated && !maximumWave;
           shouldRenderNextFrame = shouldRenderNextFrame || shouldRenderWaveAgain;
-          if (!shouldRenderWaveAgain || this.cancelled) {
+          if (!shouldKeepWave || this.cancelled) {
             deleteTheseWaves.push(wave);
           }
        }
 
         if (shouldRenderNextFrame) {
-          requestAnimationFrame(this.animate.bind(this));
-        }  else {
-          // If there is nothing to draw, clear any drawn waves now because
-          // we're not going to get another requestAnimationFrame any more.
-          var ctx = this.$.canvas.getContext('2d');
-          ctx.clearRect(0, 0, this.$.canvas.width, this.$.canvas.height);
+          requestAnimationFrame(this._loop);
         }
 
         for (var i = 0; i < deleteTheseWaves.length; ++i) {
           var wave = deleteTheseWaves[i];
           removeWaveFromScope(this, wave);
+        }
+
+        if (!this.waves.length) {
+          // If there is nothing to draw, clear any drawn waves now because
+          // we're not going to get another requestAnimationFrame any more.
+          ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          this._loop = null;
         }
       }
 
