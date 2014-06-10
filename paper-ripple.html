@@ -70,6 +70,7 @@ Apply `circle` class to make the rippling effect within a circle.
     }
 
     #canvas {
+      pointer-events: none;
       position: absolute;
       top: 0;
       left: 0;
@@ -82,8 +83,6 @@ Apply `circle` class to make the rippling effect within a circle.
     }
 
   </style>
-
-  <canvas id="canvas"></canvas>
 
 </template>
 <script>
@@ -256,6 +255,20 @@ Apply `circle` class to make the rippling effect within a circle.
       eventDelegates: {
         down: 'downAction',
         up: 'upAction'
+      },
+
+      attached: function() {
+        // create the canvas element manually becase ios
+        // does not render the canvas element if it is not created in the
+        // main document (component templates are created in a
+        // different document). See:
+        // https://bugs.webkit.org/show_bug.cgi?id=109073.
+        if (!this.$.canvas) {
+          var canvas = document.createElement('canvas');
+          canvas.id = 'canvas';
+          this.shadowRoot.appendChild(canvas);
+          this.$.canvas = canvas;
+        }
       },
 
       ready: function() {
