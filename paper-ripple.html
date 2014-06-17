@@ -99,7 +99,8 @@ Apply `circle` class to make the rippling effect within a circle.
       var touchUp = touchUpMs / 1000;
       var totalElapsed = touchDown + touchUp;
       var ww = anim.width, hh = anim.height;
-      var waveRadius = Math.min(Math.max(ww, hh), waveMaxRadius) * 1.1 + 5;
+      // use diagonal size of container to avoid floating point math sadness
+      var waveRadius = Math.min(Math.sqrt(ww * ww + hh * hh), waveMaxRadius) * 1.1 + 5;
       var duration = 1.1 - .2 * (waveRadius / waveMaxRadius);
       var tt = (totalElapsed / duration);
 
