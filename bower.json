@@ -4,6 +4,6 @@
   "dependencies": {
     "core-icon": "Polymer/core-icon#master",
     "core-icons": "Polymer/core-icons#master",
-    "font-roboto2": "Polymer/font-roboto2#master"
+    "font-roboto": "Polymer/font-roboto#master"
   }
 }
