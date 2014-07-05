@@ -132,15 +132,6 @@ Apply `circle` class to make the rippling effect within a circle.
       return Math.max(0, Math.min(outerOpacity, waveOpacity));
     }
 
-    function waveGravityToCenterPercentageFn(td, tu, r) {
-      // Convert from ms to s.
-      var touchDown = td / 1000;
-      var touchUp = tu / 1000;
-      var totalElapsed = touchDown + touchUp;
-
-      return Math.min(1.0, touchUp * 6);
-    }
-
     // Determines whether the wave should be completely removed.
     function waveDidFinish(wave, radius, anim) {
       var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp, anim);
@@ -382,8 +373,6 @@ Apply `circle` class to make the rippling effect within a circle.
 
           // Ripple gravitational pull to the center of the canvas.
           if (wave.endPosition) {
-
-            var translateFraction = waveGravityToCenterPercentageFn(tDown, tUp, wave.maxRadius);
 
             // This translates from the origin to the center of the view  based on the max dimension of  
             var translateFraction = Math.min(1, radius / wave.containerSize * 2 / Math.sqrt(2) );
