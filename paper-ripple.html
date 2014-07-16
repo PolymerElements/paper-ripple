@@ -144,20 +144,16 @@ Apply `circle` class to make the rippling effect within a circle.
     // Determines whether the wave should be completely removed.
     function waveDidFinish(wave, radius, anim) {
       var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp, anim);
+
       // If the wave opacity is 0 and the radius exceeds the bounds
       // of the element, then this is finished.
-      if (waveOpacity < 0.01 && radius >= Math.min(wave.maxRadius, waveMaxRadius)) {
-        return true;
-      }
-      return false;
+      return waveOpacity < 0.01 && radius >= Math.min(wave.maxRadius, waveMaxRadius);
     };
 
     function waveAtMaximum(wave, radius, anim) {
       var waveOpacity = waveOpacityFn(wave.tDown, wave.tUp, anim);
-      if (waveOpacity >= anim.initialOpacity && radius >= Math.min(wave.maxRadius, waveMaxRadius)) {
-        return true;
-      }
-      return false;
+
+      return waveOpacity >= anim.initialOpacity && radius >= Math.min(wave.maxRadius, waveMaxRadius);
     }
 
     //
