@@ -95,6 +95,12 @@ Apply `circle` class to make the rippling effect within a circle.
       overflow: hidden;
     }
 
+    :host(.circle) #bg,
+    :host(.circle) #ripple-container {
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
     #ripple-container {
       pointer-events: none;
       position: absolute;
