@@ -59,6 +59,12 @@ Apply `circle` class to make the rippling effect within a circle.
 
 <link rel="import" href="../polymer/polymer.html" >
 
+<template id="paper-ripple-wave">
+  <div class="wave-container">
+    <div class="wave"></div>
+  </div>
+</template>
+
 <polymer-element name="paper-ripple" attributes="initialOpacity opacityDecayVelocity">
 <template>
 
@@ -69,20 +75,7 @@ Apply `circle` class to make the rippling effect within a circle.
       position: relative;
     }
 
-    #canvas {
-      pointer-events: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    :host(.circle) #canvas {
-      border-radius: 50%;
-    }
-
-    #bg, #ripple {
+    #bg, .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -95,35 +88,36 @@ Apply `circle` class to make the rippling effect within a circle.
       overflow: hidden;
     }
 
-    :host(.circle) #bg,
-    :host(.circle) #ripple-container {
+    :host(.circle) #bg {
       border-radius: 50%;
-      overflow: hidden;
     }
 
-    #ripple-container {
+    .wave-container {
       pointer-events: none;
       position: absolute;
       top: 0;
       left: 0;
     }
 
-    #ripple {
+    :host(.circle) .wave-container {
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .wave {
       border-radius: 50%;
     }
 
   </style>
 
-  <div id="bg">
-    <div id="ripple-container">
-      <div id="ripple"></div>
-    </div>
-  </div>
+  <div id="bg"></div>
 
 </template>
 <script>
 
   (function() {
+
+    var waveTemplate = document.currentScript.ownerDocument.getElementById('paper-ripple-wave');
 
     var waveMaxRadius = 150;
     //
@@ -190,26 +184,17 @@ Apply `circle` class to make the rippling effect within a circle.
     //
     // DRAWING
     //
-    function drawRipple(ctx, x, y, radius, innerColor, outerColor, wave) {
-      // if (outerColor) {
-      //   ctx.fillStyle = outerColor;
-      //   ctx.fillRect(0,0,ctx.canvas.width, ctx.canvas.height);
-      // }
-      // ctx.beginPath();
-      // ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-      // ctx.fillStyle = innerColor;
-      // ctx.fill();
-
+    function drawRipple(ctx, x, y, radius, innerColor, outerColor) {
       if (outerColor) {
-        wave.bg.style.backgroundColor = outerColor;
+        ctx.bg.style.backgroundColor = outerColor;
       }
-      wave.ripple.style.backgroundColor = innerColor;
+      ctx.wave.style.backgroundColor = innerColor;
 
-      var s = radius / (wave.containerSize / 2);
-      var dx = x - (wave.containerWidth / 2);
-      var dy = y - (wave.containerHeight / 2);
-      wave.rc.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
-      wave.ripple.style.transform = 'scale3d(' + s + ',' + s + ',1)';
+      var s = radius / (ctx.containerSize / 2);
+      var dx = x - (ctx.containerWidth / 2);
+      var dy = y - (ctx.containerHeight / 2);
+      ctx.wc.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
+      ctx.wave.style.transform = 'scale3d(' + s + ',' + s + ',1)';
     }
 
     //
@@ -219,7 +204,16 @@ Apply `circle` class to make the rippling effect within a circle.
       var elementStyle = window.getComputedStyle(elem);
       var fgColor = elementStyle.color;
 
+      var frag = document.importNode(waveTemplate.content, true);
+      // cache the child nodes before appending to retain a reference
+      var el = frag.querySelector('.wave-container');
+      var bg = elem.$.bg;
+      bg.appendChild(frag);
+
       var wave = {
+        bg: bg,
+        wc: el,
+        wave: el.querySelector('.wave'),
         waveColor: fgColor,
         maxRadius: 0,
         isMouseDown: false,
@@ -235,6 +229,8 @@ Apply `circle` class to make the rippling effect within a circle.
       if (scope.waves) {
         var pos = scope.waves.indexOf(wave);
         scope.waves.splice(pos, 1);
+        // FIXME cache nodes
+        wave.wc.remove();
       }
     };
 
@@ -296,38 +292,11 @@ Apply `circle` class to make the rippling effect within a circle.
         up: 'upAction'
       },
 
-      attached: function() {
-        // create the canvas element manually becase ios
-        // does not render the canvas element if it is not created in the
-        // main document (component templates are created in a
-        // different document). See:
-        // https://bugs.webkit.org/show_bug.cgi?id=109073.
-
-        // if (!this.$.canvas) {
-        //   var canvas = document.createElement('canvas');
-        //   canvas.id = 'canvas';
-        //   this.shadowRoot.appendChild(canvas);
-        //   this.$.canvas = canvas;
-        // }
-      },
-
       ready: function() {
         this.waves = [];
       },
 
-      setupCanvas: function() {
-        // this.$.canvas.setAttribute('width', this.$.canvas.clientWidth * this.pixelDensity + "px");
-        // this.$.canvas.setAttribute('height', this.$.canvas.clientHeight * this.pixelDensity + "px");
-        // var ctx = this.$.canvas.getContext('2d');
-        // ctx.scale(this.pixelDensity, this.pixelDensity);
-        // if (!this._loop) {
-        //   this._loop = this.animate.bind(this, ctx);
-        // }
-      },
-
       downAction: function(e) {
-        this.setupCanvas();
-        // var wave = createWave(this.$.canvas);
         var wave = createWave(this);
 
         this.cancelled = false;
@@ -337,8 +306,6 @@ Apply `circle` class to make the rippling effect within a circle.
         wave.mouseUpStart = 0.0;
         wave.mouseDownStart = now();
 
-        // var width = this.$.canvas.width / 2; // Retina canvas
-        // var height = this.$.canvas.height / 2;
         var rect = this.getBoundingClientRect();
         var width = rect.width;
         var height = rect.height;
@@ -349,10 +316,8 @@ Apply `circle` class to make the rippling effect within a circle.
 
         if (!this._loop) {
           this._loop = this.animate.bind(this, {
-            canvas: {
-              width: width,
-              height: height
-            }
+            width: width,
+            height: height
           });
         }
 
@@ -365,13 +330,10 @@ Apply `circle` class to make the rippling effect within a circle.
         wave.containerHeight = height;
         wave.maxRadius = distanceFromPointToFurthestCorner(wave.startPosition, {w: width, h: height});
 
-        wave.bg = this.$.bg;
-        wave.ripple = this.$.ripple;
-        wave.rc = this.$['ripple-container'];
-
-        this.$['ripple-container'].style.top = (wave.containerHeight - wave.containerSize) / 2 + 'px';
-        this.$['ripple-container'].style.width = wave.containerSize + 'px';
-        this.$['ripple-container'].style.height = wave.containerSize + 'px';
+        // The wave is circular so constrain its container to 1:1
+        wave.wc.style.top = (wave.containerHeight - wave.containerSize) / 2 + 'px';
+        wave.wc.style.width = wave.containerSize + 'px';
+        wave.wc.style.height = wave.containerSize + 'px';
 
         this.waves.push(wave);
         requestAnimationFrame(this._loop);
@@ -399,9 +361,6 @@ Apply `circle` class to make the rippling effect within a circle.
       animate: function(ctx) {
         var shouldRenderNextFrame = false;
 
-        // Clear the canvas
-        // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
         var deleteTheseWaves = [];
         // The oldest wave's touch down duration
         var longestTouchDownDuration = 0;
@@ -412,8 +371,8 @@ Apply `circle` class to make the rippling effect within a circle.
         var anim = {
           initialOpacity: this.initialOpacity,
           opacityDecayVelocity: this.opacityDecayVelocity,
-          height: ctx.canvas.height,
-          width: ctx.canvas.width
+          height: ctx.height,
+          width: ctx.width
         }
 
         for (var i = 0; i < this.waves.length; i++) {
@@ -460,7 +419,7 @@ Apply `circle` class to make the rippling effect within a circle.
           }
 
           // Draw the ripple.
-          drawRipple(ctx, x, y, radius, waveColor, bgFillColor, wave);
+          drawRipple(wave, x, y, radius, waveColor, bgFillColor);
 
           // Determine whether there is any more rendering to be done.
           var maximumWave = waveAtMaximum(wave, radius, anim);
@@ -483,9 +442,8 @@ Apply `circle` class to make the rippling effect within a circle.
         }
 
         if (!this.waves.length) {
-          // If there is nothing to draw, clear any drawn waves now because
-          // we're not going to get another requestAnimationFrame any more.
-          // ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+          // clear the background color
+          this.$.bg.style.backgroundColor = null;
           this._loop = null;
         }
       }
