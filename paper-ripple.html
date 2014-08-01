@@ -59,12 +59,6 @@ Apply `circle` class to make the rippling effect within a circle.
 
 <link rel="import" href="../polymer/polymer.html" >
 
-<template id="paper-ripple-wave">
-  <div class="wave-container">
-    <div class="wave"></div>
-  </div>
-</template>
-
 <polymer-element name="paper-ripple" attributes="initialOpacity opacityDecayVelocity">
 <template>
 
@@ -116,8 +110,6 @@ Apply `circle` class to make the rippling effect within a circle.
 <script>
 
   (function() {
-
-    var waveTemplate = document.currentScript.ownerDocument.getElementById('paper-ripple-wave');
 
     var waveMaxRadius = 150;
     //
@@ -193,7 +185,11 @@ Apply `circle` class to make the rippling effect within a circle.
       var s = radius / (ctx.containerSize / 2);
       var dx = x - (ctx.containerWidth / 2);
       var dy = y - (ctx.containerHeight / 2);
+
+      ctx.wc.style.webkitTransform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
       ctx.wc.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
+
+      ctx.wave.style.webkitTransform = 'scale3d(' + s + ',' + s + ',1)';
       ctx.wave.style.transform = 'scale3d(' + s + ',' + s + ',1)';
     }
 
@@ -204,16 +200,20 @@ Apply `circle` class to make the rippling effect within a circle.
       var elementStyle = window.getComputedStyle(elem);
       var fgColor = elementStyle.color;
 
-      var frag = document.importNode(waveTemplate.content, true);
-      // cache the child nodes before appending to retain a reference
-      var el = frag.querySelector('.wave-container');
+      var inner = document.createElement('div');
+      inner.classList.add('wave');
+
+      var outer = document.createElement('div');
+      outer.classList.add('wave-container');
+      outer.appendChild(inner);
+
       var bg = elem.$.bg;
-      bg.appendChild(frag);
+      bg.appendChild(outer);
 
       var wave = {
         bg: bg,
-        wc: el,
-        wave: el.querySelector('.wave'),
+        wc: outer,
+        wave: inner,
         waveColor: fgColor,
         maxRadius: 0,
         isMouseDown: false,
