@@ -330,13 +330,6 @@ Apply `circle` class to make the rippling effect within a circle.
 
         wave.startPosition = {x:touchX, y:touchY};
 
-        if (!this._loop) {
-          this._loop = this.animate.bind(this, {
-            width: width,
-            height: height
-          });
-        }
-
         if (this.classList.contains("recenteringTouch")) {
           wave.endPosition = {x: width / 2,  y: height / 2};
           wave.slideDistance = dist(wave.startPosition, wave.endPosition);
@@ -352,7 +345,15 @@ Apply `circle` class to make the rippling effect within a circle.
         wave.wc.style.height = wave.containerSize + 'px';
 
         this.waves.push(wave);
-        requestAnimationFrame(this._loop);
+
+        if (!this._loop) {
+          this._loop = this.animate.bind(this, {
+            width: width,
+            height: height
+          });
+          requestAnimationFrame(this._loop);
+        }
+        // else there is already a rAF
       },
 
       upAction: function() {
