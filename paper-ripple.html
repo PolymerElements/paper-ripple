@@ -73,7 +73,7 @@ Apply `circle` class to make the rippling effect within a circle.
       pointer-events: none;
     }
 
-    #bg, .wave {
+    #bg, #waves, .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -83,10 +83,17 @@ Apply `circle` class to make the rippling effect within a circle.
     }
 
     #bg {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
       overflow: hidden;
     }
 
-    :host(.circle) #bg {
+    #waves {
+      overflow: hidden;
+    }
+
+    :host(.circle) #bg,
+    :host(.circle) #waves {
       border-radius: 50%;
     }
 
@@ -109,6 +116,7 @@ Apply `circle` class to make the rippling effect within a circle.
   </style>
 
   <div id="bg"></div>
+  <div id="waves"></div>
 
 </template>
 <script>
@@ -180,11 +188,12 @@ Apply `circle` class to make the rippling effect within a circle.
     //
     // DRAWING
     //
-    function drawRipple(ctx, x, y, radius, innerColor, outerColor) {
-      if (outerColor) {
-        ctx.bg.style.backgroundColor = outerColor;
+    function drawRipple(ctx, x, y, radius, innerAlpha, outerAlpha) {
+      // Only animate opacity and transform
+      if (outerAlpha !== undefined) {
+        ctx.bg.style.opacity = outerAlpha;
       }
-      ctx.wave.style.backgroundColor = innerColor;
+      ctx.wave.style.opacity = innerAlpha;
 
       var s = radius / (ctx.containerSize / 2);
       var dx = x - (ctx.containerWidth / 2);
@@ -205,17 +214,20 @@ Apply `circle` class to make the rippling effect within a circle.
       var fgColor = elementStyle.color;
 
       var inner = document.createElement('div');
+      inner.style.backgroundColor = fgColor;
       inner.classList.add('wave');
 
       var outer = document.createElement('div');
       outer.classList.add('wave-container');
       outer.appendChild(inner);
 
-      var bg = elem.$.bg;
-      bg.appendChild(outer);
+      var container = elem.$.waves;
+      container.appendChild(outer);
+
+      elem.$.bg.style.backgroundColor = fgColor;
 
       var wave = {
-        bg: bg,
+        bg: elem.$.bg,
         wc: outer,
         wave: inner,
         waveColor: fgColor,
@@ -423,7 +435,7 @@ Apply `circle` class to make the rippling effect within a circle.
           }
 
           // Draw the ripple.
-          drawRipple(wave, x, y, radius, waveColor, bgFillColor);
+          drawRipple(wave, x, y, radius, waveAlpha, bgFillAlpha);
 
           // Determine whether there is any more rendering to be done.
           var maximumWave = waveAtMaximum(wave, radius, anim);
