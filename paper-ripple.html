@@ -445,10 +445,11 @@ Apply `circle` class to make the rippling effect within a circle.
           removeWaveFromScope(this, wave);
         }
 
-        if (!this.waves.length) {
+        if (!this.waves.length && this._loop) {
           // clear the background color
           this.$.bg.style.backgroundColor = null;
           this._loop = null;
+          this.fire('core-transitionend');
         }
       }
 
