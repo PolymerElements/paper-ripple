@@ -69,6 +69,10 @@ Apply `circle` class to make the rippling effect within a circle.
       position: relative;
     }
 
+    :host-context([noink]) {
+      pointer-events: none;
+    }
+
     #bg, .wave {
       pointer-events: none;
       position: absolute;
