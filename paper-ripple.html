@@ -73,7 +73,7 @@ Apply `circle` class to make the rippling effect within a circle.
       pointer-events: none;
     }
 
-    #bg, #waves, .wave {
+    #bg, #waves, .wave-container, .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -82,15 +82,16 @@ Apply `circle` class to make the rippling effect within a circle.
       height: 100%;
     }
 
-    #bg {
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
+    #bg, .wave {
       opacity: 0;
+    }
+
+    #waves, .wave-container {
       overflow: hidden;
     }
 
-    #waves {
-      overflow: hidden;
+    .wave-container, .wave {
+      border-radius: 50%;
     }
 
     :host(.circle) #bg,
@@ -98,27 +99,15 @@ Apply `circle` class to make the rippling effect within a circle.
       border-radius: 50%;
     }
 
-    .wave-container {
-      pointer-events: none;
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-
-    :host(.circle) .wave-container {
-      border-radius: 50%;
-      overflow: hidden;
-    }
-
-    .wave {
-      border-radius: 50%;
-      opacity: 0;
-    }
-
   </style>
 
   <div id="bg"></div>
-  <div id="waves"></div>
+  <div id="waves">
+    <div class="wave-container">
+      <div class="wave">
+      </div>
+    </div>
+  </div>
 
 </template>
 <script>
@@ -200,7 +189,9 @@ Apply `circle` class to make the rippling effect within a circle.
       ctx.wc.style.webkitTransform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
       ctx.wc.style.transform = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
 
-      ctx.wave.style.webkitTransform = 'scale3d(' + s + ',' + s + ',1)';
+      // 2d transform for safari because of border-radius and overflow:hidden clipping bug.
+      // https://bugs.webkit.org/show_bug.cgi?id=98538
+      ctx.wave.style.webkitTransform = 'scale(' + s + ',' + s + ')';
       ctx.wave.style.transform = 'scale3d(' + s + ',' + s + ',1)';
     }
 
