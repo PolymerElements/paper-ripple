@@ -86,7 +86,7 @@ Apply `circle` class to make the rippling effect within a circle.
       opacity: 0;
     }
 
-    #waves, .wave-container {
+    #waves, .wave {
       overflow: hidden;
     }
 
@@ -97,6 +97,10 @@ Apply `circle` class to make the rippling effect within a circle.
     :host(.circle) #bg,
     :host(.circle) #waves {
       border-radius: 50%;
+    }
+
+    :host(.circle) .wave-container {
+      overflow: hidden;
     }
 
   </style>
