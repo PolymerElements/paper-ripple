@@ -432,7 +432,8 @@ Apply `circle` class to make the rippling effect within a circle.
           var maximumWave = waveAtMaximum(wave, radius, anim);
           var waveDissipated = waveDidFinish(wave, radius, anim);
           var shouldKeepWave = !waveDissipated || maximumWave;
-          var shouldRenderWaveAgain = !waveDissipated && !maximumWave;
+          // keep rendering dissipating wave when at maximum radius on upAction
+          var shouldRenderWaveAgain = wave.mouseUpStart ? !waveDissipated : !maximumWave;
           shouldRenderNextFrame = shouldRenderNextFrame || shouldRenderWaveAgain;
           if (!shouldKeepWave || this.cancelled) {
             deleteTheseWaves.push(wave);
