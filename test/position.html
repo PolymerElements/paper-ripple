@@ -1,19 +1,24 @@
 <!doctype html>
+<!--
+Copyright (c) 2014 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
 <html>
 <head>
-  <title>paper-ripple</title>
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  
-  <script src="../../../webcomponentsjs/webcomponents.js"></script>
-  
-  <link href="../../paper-ripple.html" rel="import">
 
-  <script src="../../../polymer-test-tools/chai/chai.js"></script>
-  <script src="../../../polymer-test-tools/htmltest.js"></script>
-  <script src="../../../polymer-gestures/test/js/fake.js"></script>
+  <meta charset="UTF-8">
+  <title>paper-ripple position tests</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <script src="../../webcomponentsjs/webcomponents.js"></script>
+  <script src="../../web-component-tester/browser.js"></script>
+  <script src="../../polymer-gestures/test/js/fake.js"></script>
+
+  <link href="../paper-ripple.html" rel="import">
 
   <style>
     .ripple-container {
@@ -53,13 +58,11 @@
 </head>
 <body unresolved>
 
-  <p>ripple originates from the tap position 1:</p>
   <div class="ripple-container ripple-1" layout vertical center>
     <paper-ripple fit></paper-ripple>
     <span class="ripple-1-tap">tap here</span>
   </div>
 
-  <p>ripple originates from the tap position 2:</p>
   <div class="ripple-container ripple-2" layout horizontal center>
     <paper-ripple fit></paper-ripple>
     <span class="ripple-2-tap">tap here</span>
@@ -77,35 +80,29 @@
       return Math.floor(p1.x) == Math.floor(p2.x) && Math.floor(p1.y) == Math.floor(p2.y);
     }
 
-    function test1() {
+    test('tall container', function(done) {
       var ripple1 = document.querySelector('.ripple-1-tap');
       fake.downOnNode(ripple1, function() {
-
         requestAnimationFrame(function() {
           var wave = document.querySelector('.ripple-1 /deep/ .wave');
-          chai.assert(approxEqual(centerOf(ripple1), centerOf(wave)), 'ripple position is incorrect in tall container');
-
-          test2();
+          assert.ok(approxEqual(centerOf(ripple1), centerOf(wave)));
+          done();
         });
-
       });
-    }
+    });
 
-    function test2() {
-      var ripple1 = document.querySelector('.ripple-2-tap');
-      fake.downOnNode(ripple1, function() {
-
+    test('wide container', function(done) {
+      var ripple2 = document.querySelector('.ripple-2-tap');
+      fake.downOnNode(ripple2, function() {
         requestAnimationFrame(function() {
           var wave = document.querySelector('.ripple-2 /deep/ .wave');
-          chai.assert(approxEqual(centerOf(ripple1), centerOf(wave)), 'ripple position is incorrect in wide container');
-
+          assert.ok(approxEqual(centerOf(ripple2), centerOf(wave)));
           done();
         });
 
       });
-    }
+    });
 
-    document.addEventListener('polymer-ready', test1);
   </script>
 
 </body>
