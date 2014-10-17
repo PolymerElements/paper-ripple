@@ -7,6 +7,6 @@
     "font-roboto": "Polymer/font-roboto#master"
   },
   "devDependencies": {
-    "polymer-test-tools": "Polymer/polymer-test-tools"
+    "web-component-tester": "Polymer/web-component-tester#^1.0.0"
   }
 }
