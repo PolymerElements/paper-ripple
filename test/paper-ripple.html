@@ -11,52 +11,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <head>
 
   <meta charset="UTF-8">
-  <title>paper-ripple position tests</title>
+  <title>paper-ripple</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-  <script src="../../webcomponentsjs/webcomponents.js"></script>
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
-  <script src="../../polymer-gestures/test/js/fake.js"></script>
+  <script src="../../simple-fixture/simple-fixture-mocha.js"></script>
 
+  <link href="../test-fixture/test-fixture.html" rel="import">
   <link href="../paper-ripple.html" rel="import">
 
-  <style>
-    .ripple-container {
-      border: 1px solid black;
-      position: relative;
-      margin: 16px;
-    }
-
-    .ripple-container > span {
-      pointer-events: none;
-    }
-
-    .ripple-1 {
-      width: 320px;
-      height: 480px;
-    }
-
-    .ripple-1-tap {
-      top: 10px;
-    }
-
-    .ripple-2 {
-      width: 480px;
-      height: 320px;
-    }
-
-    .ripple-2-tap {
-      pointer-events: none;
-    }
-
-    .ripple-3 {
-      width: 320px;
-      height: 320px;
-    }
-  </style>
-
 </head>
-<body unresolved>
+<body>
+  <test-fixture id="TrivialRipples">
+    <template>
+      <style>
+        #RippleContainer {
+          display: block;
+          position: relative;
+          width: 100px;
+          height: 50px;
+        }
+      </style>
+      <div id="RippleContainer">
+        <paper-ripple></paper-ripple>
+      </div>
+    </template>
+  </test-fixture>
 
   <div class="ripple-container ripple-1" layout vertical center>
     <paper-ripple fit></paper-ripple>
@@ -69,40 +50,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </div>
 
   <script>
-    var fake = new Fake();
+    function FakeMouseEvent (target, relativeX, relativeX) {
+      var rect = target.getBoundingClientRect()
 
-    function centerOf(node) {
-      var rect = node.getBoundingClientRect();
-      return {x: rect.left + rect.width / 2, y: rect.top + rect.height / 2};
+      return {
+        x: rect.left + relativeX,
+        y: rect.top + relativeX
+      };
     }
 
-    function approxEqual(p1, p2) {
-      return Math.floor(p1.x) == Math.floor(p2.x) && Math.floor(p1.y) == Math.floor(p2.y);
-    }
+    suite('<paper-ripple>', function () {
 
-    test('tall container', function(done) {
-      var ripple1 = document.querySelector('.ripple-1-tap');
-      fake.downOnNode(ripple1, function() {
-        requestAnimationFrame(function() {
-          var wave = document.querySelector('.ripple-1 /deep/ .wave');
-          assert.ok(approxEqual(centerOf(ripple1), centerOf(wave)));
-          done();
-        });
-      });
     });
-
-    test('wide container', function(done) {
-      var ripple2 = document.querySelector('.ripple-2-tap');
-      fake.downOnNode(ripple2, function() {
-        requestAnimationFrame(function() {
-          var wave = document.querySelector('.ripple-2 /deep/ .wave');
-          assert.ok(approxEqual(centerOf(ripple2), centerOf(wave)));
-          done();
-        });
-
-      });
-    });
-
   </script>
 
 </body>

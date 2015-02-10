@@ -44,10 +44,10 @@ Styling ripple effect:
   Note that CSS color property is inherited so it is not required to set it on
   the `paper-ripple` element directly.
 
-By default, the ripple is centered on the point of contact.  Apply `recenteringTouch` 
-class to have the ripple grow toward the center of its container.
+By default, the ripple is centered on the point of contact.  Apply the `recenters`
+attribute to have the ripple grow toward the center of its container.
 
-    <paper-ripple class="recenteringTouch"></paper-ripple>
+    <paper-ripple recenters></paper-ripple>
 
 Apply `circle` class to make the rippling effect within a circle.
 
@@ -82,7 +82,7 @@ animation finishes to perform some action.
       pointer-events: none;
     }
 
-    #bg, #waves, .wave-container, .wave {
+    #background, #waves, .wave-container, .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -91,7 +91,7 @@ animation finishes to perform some action.
       height: 100%;
     }
 
-    #bg, .wave {
+    #background, .wave {
       opacity: 0;
     }
 
@@ -103,7 +103,7 @@ animation finishes to perform some action.
       border-radius: 50%;
     }
 
-    :host(.circle) #bg,
+    :host(.circle) #background,
     :host(.circle) #waves {
       border-radius: 50%;
     }
@@ -119,10 +119,9 @@ animation finishes to perform some action.
   </template>
 </dom-module>
 <script>
-  (function () {
-
+  using(['Base'], function (Base) {
     var Utility = {
-      cssColorWithAlpha: function (cssColor, alpha) {
+      cssColorWithAlpha: function(cssColor, alpha) {
         var parts = cssColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
 
         if (typeof alpha == 'undefined') {
@@ -136,14 +135,14 @@ animation finishes to perform some action.
         return 'rgba(' + parts[1] + ', ' + parts[2] + ', ' + parts[3] + ', ' + alpha + ')';
       },
 
-      distance: function (x1, y1, x2, y2) {
+      distance: function(x1, y1, x2, y2) {
         var xDelta = (x1 - x2);
         var yDelta = (y1 - y2);
 
         return Math.sqrt(xDelta * xDelta + yDelta * yDelta);
       },
 
-      now: (function () {
+      now: (function() {
         if (window.performance && window.performance.now) {
           return window.performance.now.bind(window.performance);
         }
@@ -152,7 +151,7 @@ animation finishes to perform some action.
       })()
     };
 
-    function ContainerMetrics (element) {
+    function ElementMetrics(element) {
       this.element = element;
       this.width = this.boundingRect.width;
       this.height = this.boundingRect.height;
@@ -160,12 +159,12 @@ animation finishes to perform some action.
       this.size = Math.max(this.width, this.height);
     }
 
-    ContainerMetrics.prototype = {
+    ElementMetrics.prototype = {
       get boundingRect () {
         return this.element.getBoundingClientRect();
       },
 
-      furthestCornerDistanceFrom: function (x, y) {
+      furthestCornerDistanceFrom: function(x, y) {
         var topLeft = Utility.distance(x, y, 0, 0);
         var topRight = Utility.distance(x, y, this.width, 0);
         var bottomLeft = Utility.distance(x, y, 0, this.height);
@@ -175,7 +174,7 @@ animation finishes to perform some action.
       }
     };
 
-    function Ripple (element) {
+    function Ripple(element) {
       this.element = element;
       this.color = window.getComputedStyle(element).color;
 
@@ -185,28 +184,18 @@ animation finishes to perform some action.
       this.wave.classList.add('wave');
       this.waveContainer.classList.add('wave-container');
       this.waveContainer.appendChild(this.wave);
-      this.container.appendChild(this.waveContainer);
-      this.background.style.backgroundColor = this.color;
 
       this.resetInteractionState();
     }
 
-    Ripple.MAX_RADIUS = 150;
+    Ripple.MAX_RADIUS = 300;
 
     Ripple.prototype = {
-      get container () {
-        return this.element.$.waves;
+      get recenters() {
+        return this.element.recenters;
       },
 
-      get background () {
-        return this.element.$.background;
-      },
-
-      get recenters () {
-        return this.element.classList.contains('recenteringTouch');
-      },
-
-      get mouseDownElapsed () {
+      get mouseDownElapsed() {
         var elapsed;
 
         if (!this.mouseDownStart) {
@@ -222,32 +211,32 @@ animation finishes to perform some action.
         return elapsed;
       },
 
-      get mouseUpElapsed () {
+      get mouseUpElapsed() {
         return this.mouseUpStart ?
           Utility.now () - this.mouseUpStart : 0;
       },
 
-      get mouseDownElapsedSeconds () {
+      get mouseDownElapsedSeconds() {
         return this.mouseDownElapsed / 1000;
       },
 
-      get mouseUpElapsedSeconds () {
+      get mouseUpElapsedSeconds() {
         return this.mouseUpElapsed / 1000;
       },
 
-      get mouseInteractionSeconds () {
+      get mouseInteractionSeconds() {
         return this.mouseDownElapsedSeconds + this.mouseUpElapsedSeconds;
       },
 
-      get initialOpacity () {
+      get initialOpacity() {
         return this.element.initialOpacity;
       },
 
-      get opacityDecayVelocity () {
+      get opacityDecayVelocity() {
         return this.element.opacityDecayVelocity;
       },
 
-      get radius () {
+      get radius() {
         var width2 = this.containerMetrics.width * this.containerMetrics.width;
         var height2 = this.containerMetrics.height * this.containerMetrics.height;
         var waveRadius = Math.min(
@@ -262,7 +251,7 @@ animation finishes to perform some action.
         return Math.abs(size);
       },
 
-      get opacity () {
+      get opacity() {
         if (!this.mouseUpStart) {
           return this.initialOpacity;
         }
@@ -273,7 +262,7 @@ animation finishes to perform some action.
         );
       },
 
-      get outerOpacity () {
+      get outerOpacity() {
         // Linear increase in background opacity, capped at the opacity
         // of the wavefront (waveOpacity).
         var outerOpacity = this.mouseUpElapsedSeconds * 0.3;
@@ -285,29 +274,29 @@ animation finishes to perform some action.
         );
       },
 
-      get isOpacityFullyDecayed () {
+      get isOpacityFullyDecayed() {
         return this.opacity < 0.01 &&
           this.radius >= Math.min(this.maxRadius, Ripple.MAX_RADIUS);
       },
 
-      get isRestingAtMaxRadius () {
+      get isRestingAtMaxRadius() {
         return this.opacity >= this.initialOpacity &&
           this.radius >= Math.min(this.maxRadius, Ripple.MAX_RADIUS);
       },
 
-      get isAnimationComplete () {
+      get isAnimationComplete() {
         return this.mouseUpStart ?
           this.isOpacityFullyDecayed : this.isRestingAtMaxRadius;
       },
 
-      get translationFraction () {
+      get translationFraction() {
         return Math.min(
           1,
           this.radius / this.containerMetrics.size * 2 / Math.sqrt(2)
         );
       },
 
-      get xNow () {
+      get xNow() {
         if (this.xEnd) {
           return this.xStart + this.translationFraction * (this.xEnd - this.xStart);
         }
@@ -315,7 +304,7 @@ animation finishes to perform some action.
         return this.xStart;
       },
 
-      get yNow () {
+      get yNow() {
         if (this.yEnd) {
           return this.yStart + this.translationFraction * (this.yEnd - this.yStart);
         }
@@ -323,11 +312,11 @@ animation finishes to perform some action.
         return this.yStart;
       },
 
-      get isMouseDown () {
+      get isMouseDown() {
         return this.mouseDownStart && !this.mouseUpStart;
       },
 
-      resetInteractionState: function () {
+      resetInteractionState: function() {
         this.maxRadius = 0;
         this.mouseDownStart = 0;
         this.mouseUpStart = 0;
@@ -338,18 +327,14 @@ animation finishes to perform some action.
         this.yEnd = 0;
         this.slideDistance = 0;
 
-        this.containerMetrics = new ContainerMetrics(this.element);
+        this.containerMetrics = new ElementMetrics(this.element);
       },
 
-      draw: function () {
+      draw: function() {
         var scale;
         var translateString;
         var dx;
         var dy;
-
-        if (this.outerOpacity !== undefined) {
-          this.background.style.opacity = this.outerOpacity;
-        }
 
         this.wave.style.opacity = this.opacity;
 
@@ -357,10 +342,7 @@ animation finishes to perform some action.
         dx = this.xNow - (this.containerMetrics.width / 2);
         dy = this.yNow - (this.containerMetrics.height / 2);
 
-        translateString = 'translate3d(' + dx + 'px,' + dy + 'px,0)';
-
-        this.waveContainer.style.webkitTransform = translateString;
-        this.waveContainer.style.transform = translateString;
+        Base.translate3d(this.waveContainer, dx + 'px', dy + 'px', 0);
 
         // 2d transform for safari because of border-radius and overflow:hidden clipping bug.
         // https://bugs.webkit.org/show_bug.cgi?id=98538
@@ -368,7 +350,7 @@ animation finishes to perform some action.
         this.wave.style.transform = 'scale3d(' + scale + ',' + scale + ',1)';
       },
 
-      mouseDown: function (event) {
+      mousedownAction: function(event) {
         this.resetInteractionState();
         this.mouseDownStart = Utility.now();
 
@@ -397,7 +379,7 @@ animation finishes to perform some action.
         this.waveContainer.style.height = this.containerMetrics.size + 'px';
       },
 
-      mouseUp: function (event) {
+      mouseupAction: function(event) {
         if (!this.isMouseDown) {
           return;
         }
@@ -405,7 +387,7 @@ animation finishes to perform some action.
         this.mouseUpStart = Utility.now();
       },
 
-      remove: function () {
+      remove: function() {
         this.waveContainer.remove();
       }
     };
@@ -421,7 +403,7 @@ animation finishes to perform some action.
          * @type number
          * @default 0.25
          */
-        initialOpacity: 0.25,
+        initialOpacity: Number,
 
         /**
          * How fast (opacity per second) the wave fades out.
@@ -430,22 +412,39 @@ animation finishes to perform some action.
          * @type number
          * @default 0.8
          */
-        opacityDecayVelocity: 0.8, 
+        opacityDecayVelocity: Number, 
+
+        /**
+         * If true, ripples will exhibit a gravitational pull towards
+         * the center of their container as they fade away.
+         *
+         * @attribute recenters
+         * @type Boolean
+         * @default false
+         */
+         recenters: Boolean,
+
+         /**
+          * @private
+          */
+         backgroundOpacity: Number
+
       },
 
-      configure: function () {
+      configure: function() {
         return {
           initialOpacity: 0.25,
           opacityDecayVelocity: 0.8,
           ripples: [],
           animating: false,
+          recenters: false,
           boundAnimate: this.animate.bind(this)
         };
       },
 
       listeners: {
-        mousedown: 'onMouseDown',
-        mouseup: 'onMouseUp'
+        mousedown: 'mousedownAction',
+        mouseup: 'mouseupAction'
       },
 
       get shouldKeepAnimating () {
@@ -458,39 +457,41 @@ animation finishes to perform some action.
         return false;
       },
 
-      onMouseDown: function (event) {
+      mousedownAction: function(event) {
         var ripple = this.addRipple();
 
-        ripple.mouseDown(event);
+        ripple.mousedownAction(event);
 
         if (!this.animating) {
           this.animate();
         }
       },
 
-      onMouseUp: function (event) {
-        this.ripples.forEach(function (ripple) {
-          ripple.mouseUp(event);
+      mouseupAction: function(event) {
+        this.ripples.forEach(function(ripple) {
+          ripple.mouseupAction(event);
         });
 
         this.animate();
       },
 
-      onAnimationComplete: function () {
+      onAnimationComplete: function() {
         this.animating = false;
         this.$.background.style.backgroundColor = null;
         this.fire('transitionend');
       },
 
-      addRipple: function () {
+      addRipple: function() {
         var ripple = new Ripple(this);
 
+        this.$.waves.appendChild(ripple.waveContainer);
+        this.$.background.style.backgroundColor = ripple.color;
         this.ripples.push(ripple);
 
         return ripple;
       },
 
-      removeRipple: function (ripple) {
+      removeRipple: function(ripple) {
         var rippleIndex = this.ripples.indexOf(ripple);
 
         if (rippleIndex < 0) {
@@ -502,7 +503,7 @@ animation finishes to perform some action.
         ripple.remove();
       },
 
-      animate: function () {
+      animate: function() {
         var index;
         var ripple;
 
@@ -512,6 +513,8 @@ animation finishes to perform some action.
           ripple = this.ripples[index];
 
           ripple.draw();
+
+          this.$.background.style.opacity = ripple.outerOpacity;
 
           if (ripple.isOpacityFullyDecayed && !ripple.isRestingAtMaxRadius) {
             this.removeRipple(ripple);
@@ -525,6 +528,6 @@ animation finishes to perform some action.
         }
       }
     });
-  })();
+  });
 </script>
 

@@ -2,12 +2,12 @@
   "name": "paper-ripple",
   "private": true,
   "dependencies": {
-    "core-icon": "Polymer/core-icon#0.8-preview",
-    "core-icons": "Polymer/core-icons#0.8-preview",
-    "font-roboto": "Polymer/font-roboto#master",
     "polymer": "polymer/polymer#0.8-preview"
   },
   "devDependencies": {
-    "web-component-tester": "~2.2.3"
+    "web-component-tester": "~2.2.3",
+    "core-icon": "Polymer/core-icon#0.8-preview",
+    "core-icons": "Polymer/core-icons#0.8-preview",
+    "font-roboto": "Polymer/font-roboto#master"
   }
 }
