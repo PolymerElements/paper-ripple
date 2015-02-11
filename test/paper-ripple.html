@@ -16,38 +16,36 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
   <script src="../../web-component-tester/browser.js"></script>
-  <script src="../../simple-fixture/simple-fixture-mocha.js"></script>
+  <script src="../../test-fixture/test-fixture-mocha.js"></script>
 
-  <link href="../test-fixture/test-fixture.html" rel="import">
+  <link href="../../test-fixture/test-fixture.html" rel="import">
   <link href="../paper-ripple.html" rel="import">
 
+  <style>
+    #RippleContainer {
+      display: block;
+      position: relative;
+      width: 100px;
+      height: 50px;
+    }
+  </style>
 </head>
 <body>
-  <test-fixture id="TrivialRipples">
+  <test-fixture id="TrivialRipple">
     <template>
-      <style>
-        #RippleContainer {
-          display: block;
-          position: relative;
-          width: 100px;
-          height: 50px;
-        }
-      </style>
       <div id="RippleContainer">
         <paper-ripple></paper-ripple>
       </div>
     </template>
   </test-fixture>
 
-  <div class="ripple-container ripple-1" layout vertical center>
-    <paper-ripple fit></paper-ripple>
-    <span class="ripple-1-tap">tap here</span>
-  </div>
-
-  <div class="ripple-container ripple-2" layout horizontal center>
-    <paper-ripple fit></paper-ripple>
-    <span class="ripple-2-tap">tap here</span>
-  </div>
+  <test-fixture id="RecenteringRipple">
+    <template>
+      <div id="RippleContainer">
+        <paper-ripple recenters></paper-ripple>
+      </div>
+    </template>
+  </test-fixture>
 
   <script>
     function FakeMouseEvent (target, relativeX, relativeX) {
@@ -60,7 +58,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     }
 
     suite('<paper-ripple>', function () {
+      var mouseEvent;
+      var rippleContainer;
+      var ripple;
 
+      suite('when tapped', function () {
+        setup(function () {
+          rippleContainer = fixture('TrivialRipple');
+          ripple = rippleContainer.firstElementChild;
+
+          mouseEvent = new FakeMouseEvent(ripple, 10, 10);
+        });
+
+        test('creates a ripple', function () {
+          expect(ripple.ripples.length).to.be.eql(0);
+          ripple.mousedownAction(mouseEvent);
+          expect(ripple.ripples.length).to.be.eql(1);
+        });
+
+        test('may create multiple ripples that overlap', function () {
+          expect(ripple.ripples.length).to.be.eql(0);
+
+          for (var i = 0; i < 3; ++i) {
+            ripple.mousedownAction(mouseEvent);
+            expect(ripple.ripples.length).to.be.eql(i + 1);
+          }
+        });
+      });
+
+      suite('with the `recenters` attribute set to true', function () {
+        setup(function () {
+          rippleContainer = fixture('RecenteringRipple');
+          ripple = rippleContainer.firstElementChild;
+
+          mouseEvent = new FakeMouseEvent(ripple, 10, 10);
+        });
+
+        test('ripples will gravitate towards the center', function (done) {
+          var waveContainerElement;
+          var waveTranslateString;
+
+          ripple.mousedownAction(mouseEvent);
+
+          waveContainerElement = ripple.ripples[0].waveContainer;
+          waveTranslateString = waveContainerElement.style.transform;
+
+
+          ripple.mouseupAction(mouseEvent);
+
+          window.requestAnimationFrame(function () {
+            try {
+              expect(waveTranslateString).to.be.ok;
+              expect(waveContainerElement.style.transform).to.be.ok;
+              expect(waveContainerElement.style.transform).to.not.be.eql(waveTranslateString);
+
+              done();
+            } catch (e) {
+              done(e);
+            }
+          });
+        });
+      });
     });
   </script>
 

@@ -67,18 +67,22 @@ animation finishes to perform some action.
 @param {Object} detail.node The animated node
 -->
 
-<link rel="import" href="../polymer/polymer.html" >
+<link rel="import" href="../polymer/polymer.html">
 
 <dom-module id="paper-ripple">
   <style>
-    :host {
+    paper-ripple {
       display: block;
-      position: relative;
+      position: absolute;
       border-radius: inherit;
       overflow: hidden;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
 
-    :host-context([noink]) {
+    paper-ripple[noink] {
       pointer-events: none;
     }
 
@@ -103,12 +107,12 @@ animation finishes to perform some action.
       border-radius: 50%;
     }
 
-    :host(.circle) #background,
-    :host(.circle) #waves {
+    paper-ripple.circle #background,
+    paper-ripple.circle #waves {
       border-radius: 50%;
     }
 
-    :host(.circle) .wave-container {
+    paper-ripple.circle .wave-container {
       overflow: hidden;
     }
 
@@ -419,16 +423,19 @@ animation finishes to perform some action.
          * the center of their container as they fade away.
          *
          * @attribute recenters
-         * @type Boolean
+         * @type boolean
          * @default false
          */
          recenters: Boolean,
 
-         /**
-          * @private
-          */
-         backgroundOpacity: Number
-
+        /**
+         * A list of the visual ripples.
+         *
+         * @attribute ripples
+         * @type Array
+         * @default []
+         */
+         ripples: Array
       },
 
       configure: function() {
