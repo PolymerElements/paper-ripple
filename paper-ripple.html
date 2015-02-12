@@ -86,7 +86,10 @@ animation finishes to perform some action.
       pointer-events: none;
     }
 
-    #background, #waves, .wave-container, .wave {
+    paper-ripple #background,
+    paper-ripple #waves,
+    paper-ripple .wave-container,
+    paper-ripple .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -95,15 +98,18 @@ animation finishes to perform some action.
       height: 100%;
     }
 
-    #background, .wave {
+    paper-ripple #background,
+    paper-ripple .wave {
       opacity: 0;
     }
 
-    #waves, .wave {
+    paper-ripple #waves,
+    paper-ripple .wave {
       overflow: hidden;
     }
 
-    .wave-container, .wave {
+    paper-ripple .wave-container,
+    paper-ripple .wave {
       border-radius: 50%;
     }
 
