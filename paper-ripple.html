@@ -80,6 +80,12 @@ animation finishes to perform some action.
       left: 0;
       right: 0;
       bottom: 0;
+
+      /* This resolves a rendering issue in Chrome 40 where the
+         ripple is not properly clipped by its parent (which may have
+         rounded corners. See: http://jsbin.com/temexa/4 */
+      -webkit-transform: translate3d(0, 0, 0);
+      transform: translate3d(0, 0, 0);
     }
 
     paper-ripple[noink] {
