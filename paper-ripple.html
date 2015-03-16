@@ -71,7 +71,7 @@ animation finishes to perform some action.
 
 <dom-module id="paper-ripple">
   <style>
-    paper-ripple {
+    :host {
       display: block;
       position: absolute;
       border-radius: inherit;
@@ -88,14 +88,14 @@ animation finishes to perform some action.
       transform: translate3d(0, 0, 0);
     }
 
-    paper-ripple[noink] {
+    :host([noink]) {
       pointer-events: none;
     }
 
-    paper-ripple #background,
-    paper-ripple #waves,
-    paper-ripple .wave-container,
-    paper-ripple .wave {
+    :host #background,
+    :host #waves,
+    :host .wave-container,
+    :host .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -104,27 +104,27 @@ animation finishes to perform some action.
       height: 100%;
     }
 
-    paper-ripple #background,
-    paper-ripple .wave {
+    :host #background,
+    :host .wave {
       opacity: 0;
     }
 
-    paper-ripple #waves,
-    paper-ripple .wave {
+    :host #waves,
+    :host .wave {
       overflow: hidden;
     }
 
-    paper-ripple .wave-container,
-    paper-ripple .wave {
+    :host .wave-container,
+    :host .wave {
       border-radius: 50%;
     }
 
-    paper-ripple.circle #background,
-    paper-ripple.circle #waves {
+    :host(.circle) #background,
+    :host(.circle) #waves {
       border-radius: 50%;
     }
 
-    paper-ripple.circle .wave-container {
+    :host(.circle) .wave-container {
       overflow: hidden;
     }
 
@@ -135,7 +135,7 @@ animation finishes to perform some action.
   </template>
 </dom-module>
 <script>
-  using(['Base'], function (Base) {
+  (function() {
     var Utility = {
       cssColorWithAlpha: function(cssColor, alpha) {
         var parts = cssColor.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
@@ -199,7 +199,7 @@ animation finishes to perform some action.
       this.wave.style.backgroundColor = this.color;
       this.wave.classList.add('wave');
       this.waveContainer.classList.add('wave-container');
-      this.waveContainer.appendChild(this.wave);
+      Polymer.dom(this.waveContainer).appendChild(this.wave);
 
       this.resetInteractionState();
     }
@@ -358,7 +358,7 @@ animation finishes to perform some action.
         dx = this.xNow - (this.containerMetrics.width / 2);
         dy = this.yNow - (this.containerMetrics.height / 2);
 
-        Base.translate3d(this.waveContainer, dx + 'px', dy + 'px', 0);
+        Polymer.Base.translate3d(this.waveContainer, dx + 'px', dy + 'px', 0);
 
         // 2d transform for safari because of border-radius and overflow:hidden clipping bug.
         // https://bugs.webkit.org/show_bug.cgi?id=98538
@@ -370,8 +370,12 @@ animation finishes to perform some action.
         this.resetInteractionState();
         this.mouseDownStart = Utility.now();
 
-        this.xStart = event.x - this.containerMetrics.boundingRect.left;
-        this.yStart = event.y - this.containerMetrics.boundingRect.top;
+        this.xStart = event ?
+          event.x - this.containerMetrics.boundingRect.left :
+          this.containerMetrics.width / 2;
+        this.yStart = event ?
+          event.y - this.containerMetrics.boundingRect.top :
+          this.containerMetrics.height / 2;
 
         if (this.recenters) {
           this.xEnd = this.containerMetrics.width / 2;
@@ -404,14 +408,16 @@ animation finishes to perform some action.
       },
 
       remove: function() {
-        this.waveContainer.remove();
+        Polymer.dom(this.waveContainer.parentNode).removeChild(
+          this.waveContainer
+        );
       }
     };
 
     Polymer({
       is: 'paper-ripple',
 
-      published: {
+      properties: {
         /**
          * The initial opacity set on the wave.
          *
@@ -419,7 +425,9 @@ animation finishes to perform some action.
          * @type number
          * @default 0.25
          */
-        initialOpacity: Number,
+        initialOpacity: {
+          type: Number
+        },
 
         /**
          * How fast (opacity per second) the wave fades out.
@@ -428,7 +436,9 @@ animation finishes to perform some action.
          * @type number
          * @default 0.8
          */
-        opacityDecayVelocity: Number, 
+        opacityDecayVelocity: {
+          type: Number
+        },
 
         /**
          * If true, ripples will exhibit a gravitational pull towards
@@ -438,7 +448,9 @@ animation finishes to perform some action.
          * @type boolean
          * @default false
          */
-         recenters: Boolean,
+        recenters: {
+          type: Number
+        },
 
         /**
          * A list of the visual ripples.
@@ -447,7 +459,12 @@ animation finishes to perform some action.
          * @type Array
          * @default []
          */
-         ripples: Array
+        ripples: {
+          type: Array,
+          value: function() {
+            return [];
+          }
+        }
       },
 
       configure: function() {
@@ -474,6 +491,13 @@ animation finishes to perform some action.
         }
 
         return false;
+      },
+
+      simulatedRipple: function() {
+        this.mousedownAction();
+        this.async(function() {
+          this.mouseupAction();
+        }, 1);
       },
 
       mousedownAction: function(event) {
@@ -503,7 +527,7 @@ animation finishes to perform some action.
       addRipple: function() {
         var ripple = new Ripple(this);
 
-        this.$.waves.appendChild(ripple.waveContainer);
+        Polymer.dom(this.$.waves).appendChild(ripple.waveContainer);
         this.$.background.style.backgroundColor = ripple.color;
         this.ripples.push(ripple);
 
@@ -547,6 +571,6 @@ animation finishes to perform some action.
         }
       }
     });
-  });
+  })();
 </script>
 
