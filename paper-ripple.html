@@ -92,10 +92,10 @@ animation finishes to perform some action.
       pointer-events: none;
     }
 
-    :host #background,
-    :host #waves,
-    :host .wave-container,
-    :host .wave {
+    #background,
+    #waves,
+    .wave-container,
+    .wave {
       pointer-events: none;
       position: absolute;
       top: 0;
@@ -104,18 +104,18 @@ animation finishes to perform some action.
       height: 100%;
     }
 
-    :host #background,
-    :host .wave {
+    #background,
+    .wave {
       opacity: 0;
     }
 
-    :host #waves,
-    :host .wave {
+    #waves,
+    .wave {
       overflow: hidden;
     }
 
-    :host .wave-container,
-    :host .wave {
+    .wave-container,
+    .wave {
       border-radius: 50%;
     }
 
@@ -426,7 +426,8 @@ animation finishes to perform some action.
          * @default 0.25
          */
         initialOpacity: {
-          type: Number
+          type: Number,
+          value: 0.25
         },
 
         /**
@@ -437,7 +438,8 @@ animation finishes to perform some action.
          * @default 0.8
          */
         opacityDecayVelocity: {
-          type: Number
+          type: Number,
+          value: 0.8
         },
 
         /**
@@ -449,7 +451,8 @@ animation finishes to perform some action.
          * @default false
          */
         recenters: {
-          type: Number
+          type: Boolean,
+          value: false
         },
 
         /**
@@ -469,11 +472,8 @@ animation finishes to perform some action.
 
       configure: function() {
         return {
-          initialOpacity: 0.25,
-          opacityDecayVelocity: 0.8,
           ripples: [],
           animating: false,
-          recenters: false,
           boundAnimate: this.animate.bind(this)
         };
       },
@@ -495,6 +495,8 @@ animation finishes to perform some action.
 
       simulatedRipple: function() {
         this.mousedownAction();
+
+        // Please see polymer/polymer#1305
         this.async(function() {
           this.mouseupAction();
         }, 1);
