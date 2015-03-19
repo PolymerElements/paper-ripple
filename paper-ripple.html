@@ -474,14 +474,33 @@ animation finishes to perform some action.
         return {
           ripples: [],
           animating: false,
-          boundAnimate: this.animate.bind(this)
+          boundAnimate: this.animate.bind(this),
+          boundMousedownAction: this.mousedownAction.bind(this),
+          boundMouseupAction: this.mouseupAction.bind(this)
         };
       },
 
+      get target () {
+        return this.host || this.parentNode;
+      },
+
+      attached: function() {
+        this.target.addEventListener('mousedown', this.boundMousedownAction);
+        this.target.addEventListener('mouseup', this.boundMouseupAction);
+      },
+
+      detached: function() {
+        this.target.removeEventListener('mousedown', this.boundMousedownAction);
+        this.target.removeEventListener('mouseup', this.boundMouseupAction);
+      },
+
+      /* TODO(cdata): Replace the above attached / detached listeners when
+         PolymerGestures equivalent lands in 0.8.
       listeners: {
         mousedown: 'mousedownAction',
         mouseup: 'mouseupAction'
       },
+      */
 
       get shouldKeepAnimating () {
         for (var index = 0; index < this.ripples.length; ++index) {
