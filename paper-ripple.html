@@ -167,6 +167,10 @@ animation finishes to perform some action.
       })()
     };
 
+    /**
+     * @param {HTMLElement} element
+     * @constructor
+     */
     function ElementMetrics(element) {
       this.element = element;
       this.width = this.boundingRect.width;
@@ -190,6 +194,10 @@ animation finishes to perform some action.
       }
     };
 
+    /**
+     * @param {HTMLElement} element
+     * @constructor
+     */
     function Ripple(element) {
       this.element = element;
       this.color = window.getComputedStyle(element).color;
@@ -513,7 +521,7 @@ animation finishes to perform some action.
       },
 
       simulatedRipple: function() {
-        this.mousedownAction();
+        this.mousedownAction(null);
 
         // Please see polymer/polymer#1305
         this.async(function() {
