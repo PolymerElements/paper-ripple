@@ -489,7 +489,7 @@ animation finishes to perform some action.
       },
 
       get target () {
-        return this.host || this.parentNode;
+        return this.parentNode || this.host;
       },
 
       attached: function() {
@@ -602,4 +602,3 @@ animation finishes to perform some action.
     });
   })();
 </script>
-
