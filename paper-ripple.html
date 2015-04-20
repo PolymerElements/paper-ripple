@@ -475,17 +475,32 @@ animation finishes to perform some action.
           value: function() {
             return [];
           }
-        }
-      },
+        },
 
-      configure: function() {
-        return {
-          ripples: [],
-          animating: false,
-          boundAnimate: this.animate.bind(this),
-          boundMousedownAction: this.mousedownAction.bind(this),
-          boundMouseupAction: this.mouseupAction.bind(this)
-        };
+        _animating: {
+          type: Boolean
+        },
+
+        _boundAnimate: {
+          type: Function,
+          value: function() {
+            return this.animate.bind(this);
+          }
+        },
+
+        _boundMousedownAction: {
+          type: Function,
+          value: function() {
+            return this.mousedownAction.bind(this);
+          }
+        },
+
+        _boundMouseupAction: {
+          type: Function,
+          value: function() {
+            return this.mouseupAction.bind(this);
+          }
+        }
       },
 
       get target () {
@@ -493,13 +508,13 @@ animation finishes to perform some action.
       },
 
       attached: function() {
-        this.target.addEventListener('mousedown', this.boundMousedownAction);
-        this.target.addEventListener('mouseup', this.boundMouseupAction);
+        this.target.addEventListener('mousedown', this._boundMousedownAction);
+        this.target.addEventListener('mouseup', this._boundMouseupAction);
       },
 
       detached: function() {
-        this.target.removeEventListener('mousedown', this.boundMousedownAction);
-        this.target.removeEventListener('mouseup', this.boundMouseupAction);
+        this.target.removeEventListener('mousedown', this._boundMousedownAction);
+        this.target.removeEventListener('mouseup', this._boundMouseupAction);
       },
 
       /* TODO(cdata): Replace the above attached / detached listeners when
@@ -534,7 +549,7 @@ animation finishes to perform some action.
 
         ripple.mousedownAction(event);
 
-        if (!this.animating) {
+        if (!this._animating) {
           this.animate();
         }
       },
@@ -548,7 +563,7 @@ animation finishes to perform some action.
       },
 
       onAnimationComplete: function() {
-        this.animating = false;
+        this._animating = false;
         this.$.background.style.backgroundColor = null;
         this.fire('transitionend');
       },
@@ -579,7 +594,7 @@ animation finishes to perform some action.
         var index;
         var ripple;
 
-        this.animating = true;
+        this._animating = true;
 
         for (index = 0; index < this.ripples.length; ++index) {
           ripple = this.ripples[index];
@@ -594,7 +609,7 @@ animation finishes to perform some action.
         }
 
         if (this.shouldKeepAnimating) {
-          window.requestAnimationFrame(this.boundAnimate);
+          window.requestAnimationFrame(this._boundAnimate);
         } else if (this.ripples.length === 0) {
           this.onAnimationComplete();
         }
