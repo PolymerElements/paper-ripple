@@ -2,7 +2,7 @@
   "name": "paper-ripple",
   "private": true,
   "dependencies": {
-    "polymer": "polymer/polymer#v0.8.0-rc.6"
+    "polymer": "polymer/polymer#v0.8.0-rc.5"
   },
   "devDependencies": {
     "iron-doc-viewer": "polymerelements/iron-doc-viewer#^0.8.0",
