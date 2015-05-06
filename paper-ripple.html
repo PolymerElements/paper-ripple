@@ -380,10 +380,10 @@ animation finishes to perform some action.
         this.mouseDownStart = Utility.now();
 
         this.xStart = event ?
-          event.x - this.containerMetrics.boundingRect.left :
+          event.detail.x - this.containerMetrics.boundingRect.left :
           this.containerMetrics.width / 2;
         this.yStart = event ?
-          event.y - this.containerMetrics.boundingRect.top :
+          event.detail.y - this.containerMetrics.boundingRect.top :
           this.containerMetrics.height / 2;
 
         if (this.recenters) {
@@ -494,9 +494,9 @@ animation finishes to perform some action.
         return this.host || this.parentNode;
       },
 
-      listeners: {
-        down: 'downAction',
-        up: 'upAction'
+      attached: function() {
+        this._listen(this.target, 'up', this.upAction.bind(this));
+        this._listen(this.target, 'down', this.downAction.bind(this));
       },
 
       get shouldKeepAnimating () {
