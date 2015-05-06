@@ -72,7 +72,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         test('creates a ripple', function () {
           expect(ripple.ripples.length).to.be.eql(0);
-          ripple.mousedownAction(mouseEvent);
+          ripple.downAction(mouseEvent);
           expect(ripple.ripples.length).to.be.eql(1);
         });
 
@@ -80,7 +80,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           expect(ripple.ripples.length).to.be.eql(0);
 
           for (var i = 0; i < 3; ++i) {
-            ripple.mousedownAction(mouseEvent);
+            ripple.downAction(mouseEvent);
             expect(ripple.ripples.length).to.be.eql(i + 1);
           }
         });
@@ -98,12 +98,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var waveContainerElement;
           var waveTranslateString;
 
-          ripple.mousedownAction(mouseEvent);
+          ripple.downAction(mouseEvent);
 
           waveContainerElement = ripple.ripples[0].waveContainer;
           waveTranslateString = waveContainerElement.style.transform;
 
-          ripple.mouseupAction(mouseEvent);
+          ripple.upAction(mouseEvent);
 
           window.requestAnimationFrame(function () {
             try {
