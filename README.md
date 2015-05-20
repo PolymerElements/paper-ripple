@@ -45,11 +45,17 @@ paper-ripple {
 Note that CSS color property is inherited so it is not required to set it on
 the `paper-ripple` element directly.
 
-By default, the ripple is centered on the point of contact.  Apply the `recenters`
-attribute to have the ripple grow toward the center of its container.
+
+By default, the ripple is centered on the point of contact. Apply the ``recenters`` attribute to have the ripple grow toward the center of its container.
 
 ```html
 <paper-ripple recenters></paper-ripple>
+```
+
+Apply `center` to center the ripple inside its container from the start.
+
+```html
+<paper-ripple center></paper-ripple>
 ```
 
 Apply `circle` class to make the rippling effect within a circle.

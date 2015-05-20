@@ -40,6 +40,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
+  <test-fixture id="CenteringRipple">
+    <template>
+      <div id="RippleContainer">
+        <paper-ripple center></paper-ripple>
+      </div>
+    </template>
+  </test-fixture>
+
   <test-fixture id="RecenteringRipple">
     <template>
       <div id="RippleContainer">
@@ -50,11 +58,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
     function FakeMouseEvent (target, relativeX, relativeX) {
-      var rect = target.getBoundingClientRect()
+      var rect = target.getBoundingClientRect();
 
       return {
-        x: rect.left + relativeX,
-        y: rect.top + relativeX
+        detail: {
+          x: rect.left + relativeX,
+          y: rect.top + relativeX
+        }
       };
     }
 
@@ -87,30 +97,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
-      suite('with the `recenters` attribute set to true', function () {
+      suite('with the `center` attribute set to true', function () {
         setup(function () {
-          rippleContainer = fixture('RecenteringRipple');
+          rippleContainer = fixture('CenteringRipple');
           ripple = rippleContainer.firstElementChild;
 
           mouseEvent = new FakeMouseEvent(ripple, 10, 10);
         });
 
-        test('ripples will gravitate towards the center', function (done) {
+        test('ripples will center', function (done) {
           var waveContainerElement;
-          var waveTranslateString;
+          // let's ask the browser what `translate3d(0px, 0px, 0)` will actually look like
+          var div = document.createElement('div');
+          div.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
+          div.style.transform = 'translate3d(0px, 0px, 0)';
 
           ripple.downAction(mouseEvent);
 
           waveContainerElement = ripple.ripples[0].waveContainer;
-          waveTranslateString = waveContainerElement.style.transform;
 
           ripple.upAction(mouseEvent);
 
           window.requestAnimationFrame(function () {
+            var currentTransform = waveContainerElement.style.transform;
             try {
-              expect(waveTranslateString).to.be.ok;
-              expect(waveContainerElement.style.transform).to.be.ok;
-              expect(waveContainerElement.style.transform).to.not.be.eql(waveTranslateString);
+              expect(div.style.transform).to.be.ok;
+              expect(currentTransform).to.be.ok;
+              expect(currentTransform).to.be.eql(div.style.transform);
 
               done();
             } catch (e) {
@@ -119,6 +132,33 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           });
         });
       });
+
+      suite('with the `recenters` attribute set to true', function () {
+        setup(function () {
+          rippleContainer = fixture('RecenteringRipple');
+          ripple = rippleContainer.firstElementChild;
+          mouseEvent = new FakeMouseEvent(ripple, 10, 10);
+        });
+        test('ripples will gravitate towards the center', function (done) {
+          var waveContainerElement;
+          var waveTranslateString;
+          ripple.downAction(mouseEvent);
+          waveContainerElement = ripple.ripples[0].waveContainer;
+          waveTranslateString = waveContainerElement.style.transform;
+          ripple.upAction(mouseEvent);
+          window.requestAnimationFrame(function () {
+            try {
+              expect(waveTranslateString).to.be.ok;
+              expect(waveContainerElement.style.transform).to.be.ok;
+              expect(waveContainerElement.style.transform).to.not.be.eql(waveTranslateString);
+              done();
+            } catch (e) {
+              done(e);
+            }
+          });
+        });
+      });
+
     });
   </script>
 
