@@ -7,6 +7,8 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 
+<link rel="import" href="../polymer/polymer.html">
+
 <!--
 `paper-ripple` provides a visual effect that other paper elements can
 use to simulate a rippling effect emanating from the point of contact.  The
@@ -49,6 +51,10 @@ attribute to have the ripple grow toward the center of its container.
 
     <paper-ripple recenters></paper-ripple>
 
+You can also  center the ripple inside its container from the start.
+
+    <paper-ripple center></paper-ripple>
+
 Apply `circle` class to make the rippling effect within a circle.
 
     <paper-ripple class="circle"></paper-ripple>
@@ -66,8 +72,6 @@ animation finishes to perform some action.
 @param {Object} detail
 @param {Object} detail.node The animated node
 -->
-
-<link rel="import" href="../polymer/polymer.html">
 
 <dom-module id="paper-ripple">
   <style>
@@ -217,6 +221,10 @@ animation finishes to perform some action.
     Ripple.prototype = {
       get recenters() {
         return this.element.recenters;
+      },
+
+      get center() {
+        return this.element.center;
       },
 
       get mouseDownElapsed() {
@@ -376,19 +384,30 @@ animation finishes to perform some action.
       },
 
       downAction: function(event) {
+        var xCenter = this.containerMetrics.width / 2;
+        var yCenter = this.containerMetrics.height / 2;
+
         this.resetInteractionState();
         this.mouseDownStart = Utility.now();
 
-        this.xStart = event ?
-          event.detail.x - this.containerMetrics.boundingRect.left :
-          this.containerMetrics.width / 2;
-        this.yStart = event ?
-          event.detail.y - this.containerMetrics.boundingRect.top :
-          this.containerMetrics.height / 2;
+        if (this.center) {
+          this.xStart = xCenter;
+          this.yStart = yCenter;
+          this.slideDistance = Utility.distance(
+            this.xStart, this.yStart, this.xEnd, this.yEnd
+          );
+        } else {
+          this.xStart = event ?
+              event.detail.x - this.containerMetrics.boundingRect.left :
+              this.containerMetrics.width / 2;
+          this.yStart = event ?
+              event.detail.y - this.containerMetrics.boundingRect.top :
+              this.containerMetrics.height / 2;
+        }
 
         if (this.recenters) {
-          this.xEnd = this.containerMetrics.width / 2;
-          this.yEnd = this.containerMetrics.height / 2;
+          this.xEnd = xCenter;
+          this.yEnd = yCenter;
           this.slideDistance = Utility.distance(
             this.xStart, this.yStart, this.xEnd, this.yEnd
           );
@@ -460,6 +479,18 @@ animation finishes to perform some action.
          * @default false
          */
         recenters: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * If true, ripples will center inside its container
+         *
+         * @attribute recenters
+         * @type boolean
+         * @default false
+         */
+        center: {
           type: Boolean,
           value: false
         },
