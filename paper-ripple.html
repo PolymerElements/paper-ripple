@@ -85,10 +85,16 @@ animation finishes to perform some action.
       left: 0;
       right: 0;
       bottom: 0;
+    }
 
-      /* This resolves a rendering issue in Chrome 40 where the
+    :host([animating]) {
+      /* This resolves a rendering issue in Chrome (as of 40) where the
          ripple is not properly clipped by its parent (which may have
-         rounded corners. See: http://jsbin.com/temexa/4 */
+         rounded corners). See: http://jsbin.com/temexa/4
+
+         Note: We only apply this style conditionally. Otherwise, the browser
+         will create a new compositing layer for every ripple element on the
+         page, and that would be bad. */
       -webkit-transform: translate(0, 0);
       transform: translate3d(0, 0, 0);
     }
@@ -510,6 +516,17 @@ animation finishes to perform some action.
           }
         },
 
+        /**
+         * True when there are visible ripples animating within the
+         * element.
+         */
+        animating: {
+          type: Boolean,
+          readOnly: true,
+          reflectToAttribute: true,
+          value: false
+        },
+
         _animating: {
           type: Boolean
         },
@@ -581,6 +598,8 @@ animation finishes to perform some action.
         this.$.background.style.backgroundColor = ripple.color;
         this.ripples.push(ripple);
 
+        this._setAnimating(true);
+
         return ripple;
       },
 
@@ -594,6 +613,10 @@ animation finishes to perform some action.
         this.ripples.splice(rippleIndex, 1);
 
         ripple.remove();
+
+        if (!this.ripples.length) {
+          this._setAnimating(false);
+        }
       },
 
       animate: function() {
