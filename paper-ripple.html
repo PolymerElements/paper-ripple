@@ -8,6 +8,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-a11y-keys-behavior/iron-a11y-keys-behavior.html">
 
 <!--
 `paper-ripple` provides a visual effect that other paper elements can
@@ -452,6 +453,10 @@ animation finishes to perform some action.
     Polymer({
       is: 'paper-ripple',
 
+      behaviors: [
+        Polymer.IronA11yKeysBehavior
+      ],
+
       properties: {
         /**
          * The initial opacity set on the wave.
@@ -527,6 +532,16 @@ animation finishes to perform some action.
           value: false
         },
 
+        /**
+         * If true, the ripple will remain in the "down" state until `holdDown`
+         * is set to false again.
+         */
+        holdDown: {
+          type: Boolean,
+          value: false,
+          observer: '_holdDownChanged'
+        },
+
         _animating: {
           type: Boolean
         },
@@ -540,12 +555,33 @@ animation finishes to perform some action.
       },
 
       get target () {
-        return this.host || this.parentNode;
+        var ownerRoot = Polymer.dom(this).getOwnerRoot();
+        var target;
+
+        if (ownerRoot) {
+          target = ownerRoot.host;
+        }
+
+        if (!target) {
+          target = this.parentNode;
+        }
+
+        return target;
+      },
+
+      keyBindings: {
+        'enter:keydown': '_onEnterKeydown',
+        'space:keydown': '_onSpaceKeydown',
+        'space:keyup': '_onSpaceKeyup'
       },
 
       attached: function() {
         this._listen(this.target, 'up', this.upAction.bind(this));
         this._listen(this.target, 'down', this.downAction.bind(this));
+
+        if (!this.target.hasAttribute('noink')) {
+          this.keyEventTarget = this.target;
+        }
       },
 
       get shouldKeepAnimating () {
@@ -568,6 +604,10 @@ animation finishes to perform some action.
       },
 
       downAction: function(event) {
+        if (this.holdDown && this.ripples.length > 0) {
+          return;
+        }
+
         var ripple = this.addRipple();
 
         ripple.downAction(event);
@@ -578,6 +618,10 @@ animation finishes to perform some action.
       },
 
       upAction: function(event) {
+        if (this.holdDown) {
+          return;
+        }
+
         this.ripples.forEach(function(ripple) {
           ripple.upAction(event);
         });
@@ -637,10 +681,31 @@ animation finishes to perform some action.
           }
         }
 
-        if (this.shouldKeepAnimating) {
-          window.requestAnimationFrame(this._boundAnimate);
-        } else if (this.ripples.length === 0) {
+        if (!this.shouldKeepAnimating && this.ripples.length === 0) {
           this.onAnimationComplete();
+        } else {
+          window.requestAnimationFrame(this._boundAnimate);
+        }
+      },
+
+      _onEnterKeydown: function() {
+        this.downAction();
+        this.async(this.upAction, 1);
+      },
+
+      _onSpaceKeydown: function() {
+        this.downAction();
+      },
+
+      _onSpaceKeyup: function() {
+        this.upAction();
+      },
+
+      _holdDownChanged: function(holdDown) {
+        if (holdDown) {
+          this.downAction();
+        } else {
+          this.upAction();
         }
       }
     });
