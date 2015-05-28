@@ -1,6 +1,7 @@
 {
   "name": "paper-ripple",
   "version": "0.9.4",
+  "license": "http://polymer.github.io/LICENSE.txt",
   "description": "Adds a material design ripple to any container",
   "private": true,
   "authors": [
