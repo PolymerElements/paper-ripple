@@ -12,6 +12,10 @@
     "polymer",
     "ripple"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/PolymerElements/paper-ripple.git"
+  },
   "main": "paper-ripple.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^1.0.0",
