@@ -565,6 +565,11 @@ Apply `circle` class to make the rippling effect within a circle.
           this.keyEventTarget = this.target;
         }
       },
+      
+      detached: function() {
+        this.unlisten(this.target, 'up', 'upAction');
+        this.unlisten(this.target, 'down', 'downAction');
+      },
 
       get shouldKeepAnimating () {
         for (var index = 0; index < this.ripples.length; ++index) {
