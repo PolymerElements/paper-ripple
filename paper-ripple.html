@@ -690,8 +690,12 @@ Apply `circle` class to make the rippling effect within a circle.
         this.upAction();
       },
 
-      _holdDownChanged: function(holdDown) {
-        if (holdDown) {
+      _holdDownChanged: function(newVal, oldVal) {
+        if (oldVal === undefined) {
+          return;
+        }
+
+        if (newVal) {
           this.downAction();
         } else {
           this.upAction();
