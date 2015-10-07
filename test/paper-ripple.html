@@ -93,6 +93,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
+      suite('when holdDown is togggled', function() {
+        setup(function () {
+          rippleContainer = fixture('TrivialRipple');
+          ripple = rippleContainer.firstElementChild;
+        });
+
+        test('generates a ripple', function() {
+          ripple.holdDown = true;
+          expect(ripple.ripples.length).to.be.eql(1);
+        });
+
+        test('generates a ripple when noink', function() {
+          ripple.noink = true;
+          ripple.holdDown = true;
+          expect(ripple.ripples.length).to.be.eql(1);
+
+        });
+
+      });
+
       suite('when target is noink', function () {
         setup(function () {
           rippleContainer = fixture('NoinkTarget');
@@ -112,6 +132,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           expect(ripple.ripples.length).to.be.eql(1);
         });
       });
+
+      
 
       suite('with the `center` attribute set to true', function () {
         setup(function () {

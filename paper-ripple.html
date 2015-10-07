@@ -584,6 +584,11 @@ Apply `circle` class to make the rippling effect within a circle.
         this.listen(this.target, 'down', 'uiDownAction');
       },
 
+      detached: function() {
+        this.unlisten(this.target, 'up', 'uiUpAction');
+        this.unlisten(this.target, 'down', 'uiDownAction');
+      },
+
       get shouldKeepAnimating () {
         for (var index = 0; index < this.ripples.length; ++index) {
           if (!this.ripples[index].isAnimationComplete) {
@@ -603,13 +608,22 @@ Apply `circle` class to make the rippling effect within a circle.
         }, 1);
       },
 
-      /** @param {Event=} event */
+      /** 
+       * Provokes a ripple down effect via a UI event, 
+       * respecting the `noink` property.
+       * @param {Event=} event 
+       */
       uiDownAction: function(event) {
         if (!this.noink) {
           this.downAction(event);
         }
       },
 
+      /** 
+       * Provokes a ripple down effect via a UI event, 
+       * *not* respecting the `noink` property.
+       * @param {Event=} event 
+       */
       downAction: function(event) {
         if (this.holdDown && this.ripples.length > 0) {
           return;
@@ -624,13 +638,22 @@ Apply `circle` class to make the rippling effect within a circle.
         }
       },
 
-      /** @param {Event=} event */
+      /** 
+       * Provokes a ripple up effect via a UI event, 
+       * respecting the `noink` property.
+       * @param {Event=} event 
+       */
       uiUpAction: function(event) {
         if (!this.noink) {
           this.upAction(event);
         }
       },
 
+      /** 
+       * Provokes a ripple up effect via a UI event, 
+       * *not* respecting the `noink` property.
+       * @param {Event=} event 
+       */
       upAction: function(event) {
         if (this.holdDown) {
           return;
