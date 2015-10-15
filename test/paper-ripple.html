@@ -120,7 +120,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
 
         test('tapping does not create a ripple', function () {
-          expect(ripple.keyEventTarget).to.be.equal(ripple);
           expect(ripple.ripples.length).to.be.eql(0);
           MockInteractions.down(ripple);
           expect(ripple.ripples.length).to.be.eql(0);
@@ -133,7 +132,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
-      
+
 
       suite('with the `center` attribute set to true', function () {
         setup(function () {
