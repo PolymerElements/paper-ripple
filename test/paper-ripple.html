@@ -31,7 +31,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   </style>
 </head>
 <body>
-  <test-fixture id="TrivialRipple">
+  <test-fixture id="BasicRipple">
     <template>
       <div id="RippleContainer">
         <paper-ripple></paper-ripple>
@@ -39,158 +39,83 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
-  <test-fixture id="CenteringRipple">
+  <test-fixture id="DisabledTarget">
     <template>
       <div id="RippleContainer">
-        <paper-ripple center></paper-ripple>
-      </div>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="RecenteringRipple">
-    <template>
-      <div id="RippleContainer">
-        <paper-ripple recenters></paper-ripple>
-      </div>
-    </template>
-  </test-fixture>
-
-  <test-fixture id="NoinkTarget">
-    <template>
-      <div id="RippleContainer">
-        <paper-ripple noink></paper-ripple>
+        <paper-ripple disabled></paper-ripple>
       </div>
     </template>
   </test-fixture>
 
   <script>
-    suite('<paper-ripple>', function () {
+    suite('<paper-ripple>', function() {
       var mouseEvent;
       var rippleContainer;
       var ripple;
 
-      suite('when tapped', function () {
-        setup(function () {
-          rippleContainer = fixture('TrivialRipple');
+      suite('when tapped', function() {
+        setup(function() {
+          rippleContainer = fixture('BasicRipple');
           ripple = rippleContainer.firstElementChild;
         });
 
-        test('creates a ripple', function () {
-          expect(ripple.ripples.length).to.be.eql(0);
+        test('creates a ripple', function() {
+          expect(ripple._ripples.length).to.be.eql(0);
           MockInteractions.down(ripple);
-          expect(ripple.ripples.length).to.be.eql(1);
+          expect(ripple._ripples.length).to.be.eql(1);
         });
 
-        test('may create multiple ripples that overlap', function () {
-          expect(ripple.ripples.length).to.be.eql(0);
+        test('may create multiple ripples that overlap', function() {
+          expect(ripple._ripples.length).to.be.eql(0);
 
           for (var i = 0; i < 3; ++i) {
             MockInteractions.down(ripple);
-            expect(ripple.ripples.length).to.be.eql(i + 1);
+            expect(ripple._ripples.length).to.be.eql(i + 1);
           }
         });
       });
 
-      suite('when holdDown is togggled', function() {
-        setup(function () {
-          rippleContainer = fixture('TrivialRipple');
+
+      suite('when target is disabled', function() {
+        setup(function() {
+          rippleContainer = fixture('DisabledTarget');
           ripple = rippleContainer.firstElementChild;
         });
 
-        test('generates a ripple', function() {
-          ripple.holdDown = true;
-          expect(ripple.ripples.length).to.be.eql(1);
-        });
-
-        test('generates a ripple when noink', function() {
-          ripple.noink = true;
-          ripple.holdDown = true;
-          expect(ripple.ripples.length).to.be.eql(1);
-
-        });
-
-      });
-
-      suite('when target is noink', function () {
-        setup(function () {
-          rippleContainer = fixture('NoinkTarget');
-          ripple = rippleContainer.firstElementChild;
-        });
-
-        test('tapping does not create a ripple', function () {
-          expect(ripple.ripples.length).to.be.eql(0);
+        test('tapping does not create a ripple', function() {
+          expect(ripple._ripples.length).to.be.eql(0);
           MockInteractions.down(ripple);
-          expect(ripple.ripples.length).to.be.eql(0);
+          expect(ripple._ripples.length).to.be.eql(0);
         });
 
-        test('ripples can be manually created', function () {
-          expect(ripple.ripples.length).to.be.eql(0);
-          ripple.simulatedRipple()
-          expect(ripple.ripples.length).to.be.eql(1);
+        test('ripples can be manually created', function() {
+          expect(ripple._ripples.length).to.be.eql(0);
+          ripple.downAction({x: 0, y: 0});
+          expect(ripple._ripples.length).to.be.eql(1);
         });
       });
 
 
-
-      suite('with the `center` attribute set to true', function () {
-        setup(function () {
-          rippleContainer = fixture('CenteringRipple');
+      suite('when target is focused', function() {
+        setup(function() {
+          rippleContainer = fixture('BasicRipple');
           ripple = rippleContainer.firstElementChild;
         });
 
-        test('ripples will center', function (done) {
-          var waveContainerElement;
-          // let's ask the browser what `translate3d(0px, 0px, 0)` will actually look like
-          var div = document.createElement('div');
-          div.style.webkitTransform = 'translate3d(0px, 0px, 0px)';
-          div.style.transform = 'translate3d(0px, 0px, 0)';
+        test('enter key creates a ripple', function() {
+          ripple.focus();
+          expect(ripple._ripples.length).to.be.eql(0);
+          MockInteractions.pressEnter(ripple);
+          expect(ripple._ripples.length).to.be.eql(1);
+        });
 
-          MockInteractions.down(ripple);
-
-          waveContainerElement = ripple.ripples[0].waveContainer;
-
-          MockInteractions.up(ripple);
-
-          window.requestAnimationFrame(function () {
-            var currentTransform = waveContainerElement.style.transform;
-            try {
-              expect(div.style.transform).to.be.ok;
-              expect(currentTransform).to.be.ok;
-              expect(currentTransform).to.be.eql(div.style.transform);
-
-              done();
-            } catch (e) {
-              done(e);
-            }
-          });
+        test('space key creates a ripple', function() {
+          ripple.focus();
+          expect(ripple._ripples.length).to.be.eql(0);
+          MockInteractions.pressSpace(ripple);
+          expect(ripple._ripples.length).to.be.eql(1);
         });
       });
-
-      suite('with the `recenters` attribute set to true', function () {
-        setup(function () {
-          rippleContainer = fixture('RecenteringRipple');
-          ripple = rippleContainer.firstElementChild;
-        });
-        test('ripples will gravitate towards the center', function (done) {
-          var waveContainerElement;
-          var waveTranslateString;
-          MockInteractions.down(ripple, {x: 10, y: 10});
-          waveContainerElement = ripple.ripples[0].waveContainer;
-          waveTranslateString = waveContainerElement.style.transform;
-          MockInteractions.up(ripple);
-          window.requestAnimationFrame(function () {
-            try {
-              expect(waveTranslateString).to.be.ok;
-              expect(waveContainerElement.style.transform).to.be.ok;
-              expect(waveContainerElement.style.transform).to.not.be.eql(waveTranslateString);
-              done();
-            } catch (e) {
-              done(e);
-            }
-          });
-        });
-      });
-
     });
   </script>
 

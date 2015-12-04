@@ -23,6 +23,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <link rel="import" href="../../paper-styles/typography.html">
   <link rel="import" href="../../iron-icon/iron-icon.html">
 
+  <style is="custom-style">
+   .light {
+     --paper-ripple-color: rgba(255, 255, 255, 0.12);
+   }
+  </style>
   <style>
 
     body {
@@ -242,9 +247,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 </head>
 <body>
-
   <section>
-
     <div class="button raised">
       <div class="center" fit tabindex="1">SUBMIT</div>
       <paper-ripple></paper-ripple>
@@ -252,7 +255,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="button raised" noink>
       <div class="center" fit tabindex="1">NO INK</div>
-      <paper-ripple noink></paper-ripple>
+      <paper-ripple disabled></paper-ripple>
     </div>
 
     <div class="button raised grey">
@@ -262,16 +265,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="button raised blue">
       <div class="center" fit tabindex="1">COMPOSE</div>
-      <paper-ripple></paper-ripple>
+      <paper-ripple class="light"></paper-ripple>
     </div>
 
     <div class="button raised green">
       <div class="center" fit tabindex="1">OK</div>
-      <paper-ripple></paper-ripple>
+      <paper-ripple class="light"></paper-ripple>
     </div>
-
   </section>
-
   <section>
 
     <div class="button raised grey narrow">
@@ -295,22 +296,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="icon-button">
       <iron-icon icon="menu" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple unbounded max-radius="28"></paper-ripple>
     </div>
 
     <div class="icon-button">
       <iron-icon icon="more-vert" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple unbounded></paper-ripple>
     </div>
 
     <div class="icon-button red">
       <iron-icon icon="delete" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple unbounded></paper-ripple>
     </div>
 
     <div class="icon-button blue">
       <iron-icon icon="account-box" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple unbounded></paper-ripple>
     </div>
 
   </section>
@@ -319,17 +320,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="fab red">
       <iron-icon icon="add" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="light"></paper-ripple>
     </div>
 
     <div class="fab blue">
       <iron-icon icon="mail" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="light"></paper-ripple>
     </div>
 
     <div class="fab green">
       <iron-icon icon="create" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="light"></paper-ripple>
     </div>
 
   </section>
@@ -402,14 +403,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </div>
 
     <div class="card" tabindex="1">
-      <paper-ripple recenters></paper-ripple>
+      <paper-ripple></paper-ripple>
     </div>
 
     <div class="card image" tabindex="1">
-      <paper-ripple recenters></paper-ripple>
+      <paper-ripple class="light"></paper-ripple>
     </div>
 
   </section>
-
 </body>
 </html>

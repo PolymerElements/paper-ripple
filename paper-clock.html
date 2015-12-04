@@ -1,0 +1,77 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../polymer/polymer.html">
+
+<!--
+A default animation clock, with variable speed.
+-->
+
+<script>
+  (function(scope) {
+    // The function to query for the underlying system time.
+    var defaultNowFunc = window.performance && window.performance.now ?
+        window.performance.now.bind(window.performance) : Date.now;
+
+    /**
+     * A default animation clock, with variable speed.
+     * @param {number=} opt_speed
+     * @param {function()=} opt_nowFunc
+     * @constructor
+     */
+    scope.PaperClock = function(opt_speed, opt_nowFunc) {
+      opt_speed = opt_speed || 1;
+      opt_nowFunc = opt_nowFunc || defaultNowFunc;
+
+      /**
+       * The time the clock was initialized. This allows for variable time speed.
+       * @private {?number}
+       */
+      this.startTime_ = null;
+
+      /**
+       * Function to query for time.
+       * @private {function()}
+       */
+      this.nowFunc_ = opt_nowFunc;
+
+      this.setSpeed(opt_speed);
+    };
+    var Clock = scope.PaperClock;
+
+
+    /**
+     * Get the current time.
+     * @return {number}
+     */
+    Clock.prototype.now = function() {
+      return this.startTime_ + this.speed_ * (this.nowFunc_() - this.startTime_);
+    };
+
+
+    /**
+     * Run the given function at the next available step.
+     * @param {function(number)} func
+     */
+    Clock.prototype.tick = function(func) {
+      window.requestAnimationFrame(func);
+    };
+
+
+    /**
+     * A speed multiplier where fast == speed > 1 and slow == speed < 1
+     * @param {number} speed
+     */
+    Clock.prototype.setSpeed = function(speed) {
+      this.startTime_ = this.nowFunc_();
+      this.speed_ = speed;
+    };
+  }(Polymer))
+</script>

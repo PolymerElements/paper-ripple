@@ -1,0 +1,296 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="paper-ripple-base.html">
+
+<!--
+A foreground ripple, centered at a point.
+Multiple foreground ripples can be present within the same container.
+-->
+
+<script>
+ (function(scope) {
+    /**
+     * A foreground ripple, centered at (leftPx, topPx).
+     * Multiple foreground ripples can be present within the same container.
+     * @param {!PaperClock} clock
+     * @param {number} leftPx
+     * @param {number} topPx
+     * @param {boolean} isBounded
+     * @constructor
+     * @extends {Ripple}
+     * @suppress {invalidCasts}
+     */
+    scope.RippleForeground =
+          function(clock, leftPx, topPx, isBounded) {
+      scope.Ripple.call(/** @type {Ripple} */ (this), clock);
+
+      /**
+       * Bounded ripples are the usual case, completely contained within another
+       * element. Unbounded ripples can draw outside of their immediate container.
+       * @private {boolean}
+       */
+      this.isBounded_ = isBounded;
+
+      /**
+       * @private {!PaperTween}
+       */
+      this.leftTween_ = new Polymer.PaperTween(clock, leftPx);
+
+      /**
+       * @private {!PaperTween}
+       */
+      this.topTween_ = new Polymer.PaperTween(clock, topPx);
+
+      /**
+       * @private {!PaperTween}
+       */
+      this.radiusTween_ = new Polymer.PaperTween(clock, 0);
+
+      /**
+       * For unbounded ripples, we are given a target radius to expand to.
+       * @private {?number}
+       */
+      this.targetRadius_ = null;
+
+      /**
+       * The parent container center.
+       * @private {?{
+       *     left: number,
+       *     top: number
+       * }}
+       */
+      this.boundsCenter_ = null;
+    };
+    var RippleForeground = scope.RippleForeground;
+
+    RippleForeground.prototype = Object.create(Polymer.Ripple.prototype);
+    RippleForeground.prototype.constructor = RippleForeground;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.WAVE_TOUCH_DOWN_ACCELERATION_ = 1024;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.WAVE_TOUCH_UP_ACCELERATION_ = 3400;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.WAVE_OPACITY_DECAY_VELOCITY_ = 3;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.BOUNDED_ORIGIN_EXIT_DURATION_MS_ = 300;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.BOUNDED_RADIUS_EXIT_DURATION_MS_ = 800;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.BOUNDED_OPACITY_EXIT_DURATION_MS_ = 400;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.RIPPLE_ENTER_DELAY_MS_ = 80;
+
+    /**
+     * For bounded tap, this is the target radius to grow to.
+     * @const {number}
+     * @private
+     */
+    RippleForeground.MAX_BOUNDED_RADIUS_PX_ = 350;
+
+    /**
+     * @const {number}
+     * @private
+     */
+    RippleForeground.OPACITY_ENTER_DURATION_FAST_MS_ = 120;
+
+
+    /**
+     * Initialize the DOM and computed measurements for the ripple.
+     * @param {!Element} container
+     * @param {string} rgbaColor
+     * @param {number} radius
+     * @param {number} containerWidth
+     * @param {number} containerHeight
+     */
+    RippleForeground.prototype.init =
+          function(container, rgbaColor, radius, containerWidth, containerHeight) {
+      this.tweens.push(this.leftTween_, this.topTween_, this.radiusTween_);
+
+      this.initDom(container, rgbaColor);
+      this.targetRadius_ = radius;
+
+      this.opacityTween.setValue(1);
+      this.element.style.opacity = 1;
+
+      this.boundsCenter_ = {
+        left: containerWidth / 2,
+        top: containerHeight / 2
+      };
+    };
+
+
+    /**
+     * For unbounded ripples only. This implements the pressed state functionality
+     * with expands the ripple linearly from the start point.
+     */
+    RippleForeground.prototype.enter = function() {
+      Polymer.Ripple.prototype.enter.call(this);
+      if (this.isBounded_) {
+        return;
+      }
+
+      // Duration for radius and origin tween should be proportional to the square
+      // root of the target ripple radius. The sqrt makes it so that large
+      // containers don't get filled too slowly versus smaller containers.
+      var radiusDuration = 1000 * Math.sqrt(
+          this.targetRadius_ / RippleForeground.WAVE_TOUCH_DOWN_ACCELERATION_) +
+              0.5;
+      this.radiusTween_
+          .reset()
+          .setDuration(radiusDuration)
+          .setRange(this.radiusTween_.getValue(), this.targetRadius_)
+          .setEasing('linear')
+          .setDelay(RippleForeground.RIPPLE_ENTER_DELAY_MS_)
+          .start();
+
+      this.leftTween_
+          .reset()
+          .setDuration(radiusDuration)
+          .setRange(this.leftTween_.getValue(), this.boundsCenter_.left)
+          .setEasing('linear')
+          .setDelay(RippleForeground.RIPPLE_ENTER_DELAY_MS_)
+          .start();
+
+      this.topTween_
+          .reset()
+          .setDuration(radiusDuration)
+          .setRange(this.topTween_.getValue(), this.boundsCenter_.top)
+          .setEasing('linear')
+          .setDelay(RippleForeground.RIPPLE_ENTER_DELAY_MS_)
+          .start();
+
+      this.opacityTween
+          .reset()
+          .setDuration(RippleForeground.OPACITY_ENTER_DURATION_FAST_MS_)
+          .setRange(this.opacityTween.getValue(), 1)
+          .setEasing('linear')
+          .start();
+    };
+
+
+    /**
+     * Ripple expands and fades out on exit. The implements the "tap" functionality.
+     */
+    RippleForeground.prototype.exit = function() {
+      Polymer.Ripple.prototype.exit.call(this);
+      var radiusDuration;
+      var originDuration;
+      var opacityDuration;
+
+      var radius, targetLeft, targetTop;
+
+      if (this.isBounded_) {
+        radiusDuration = RippleForeground.BOUNDED_RADIUS_EXIT_DURATION_MS_;
+        originDuration = RippleForeground.BOUNDED_ORIGIN_EXIT_DURATION_MS_;
+        opacityDuration = RippleForeground.BOUNDED_OPACITY_EXIT_DURATION_MS_;
+
+        // Apply some randomness to the max radius so repeated clicks look
+        // different.
+        var baseRadiusPercentage = 0.9;
+        radius = RippleForeground.MAX_BOUNDED_RADIUS_PX_ *
+            (baseRadiusPercentage + Math.random() * (1 - baseRadiusPercentage));
+
+        // Gravitate towards center, only part of the way, since this could look
+        // visually odd for large containers.
+        var percentMovementToCenter = 0.3;
+        targetLeft = this.boundsCenter_.left + (1 - percentMovementToCenter) *
+            (this.leftTween_.getValue() - this.boundsCenter_.left);
+        targetTop = this.boundsCenter_.top + (1 - percentMovementToCenter) *
+            (this.topTween_.getValue() - this.boundsCenter_.top);
+      } else {
+        var remainingRadius = this.targetRadius_ - this.radiusTween_.getValue();
+        // The release radius duration depends on how much is left to tween.
+        radiusDuration = 1000 * Math.sqrt(
+            remainingRadius / (RippleForeground.WAVE_TOUCH_UP_ACCELERATION_ +
+                RippleForeground.WAVE_TOUCH_DOWN_ACCELERATION_));
+        originDuration = radiusDuration;
+
+        opacityDuration = 1000 * this.opacityTween.getValue() /
+            RippleForeground.WAVE_OPACITY_DECAY_VELOCITY_;
+
+        radius = this.targetRadius_;
+        targetLeft = this.boundsCenter_.left;
+        targetTop = this.boundsCenter_.top;
+      }
+
+      this.opacityTween
+          .reset()
+          .setDuration(opacityDuration)
+          .setRange(this.opacityTween.getValue(), 0)
+          .start();
+
+      this.leftTween_
+          .reset()
+          .setDuration(originDuration)
+          .setRange(this.leftTween_.getValue(), targetLeft)
+          .setEasing('log_decelerate')
+          .start();
+
+      this.topTween_
+          .reset()
+          .setDuration(originDuration)
+          .setRange(this.topTween_.getValue(), targetTop)
+          .setEasing('log_decelerate')
+          .start();
+
+      this.radiusTween_
+          .reset()
+          .setDuration(radiusDuration)
+          .setEasing('log_decelerate')
+          .setRange(this.radiusTween_.getValue(), radius)
+          .start();
+    };
+
+
+    /**
+     * Re-draw the ripple.
+     * @param {number} t
+     */
+    RippleForeground.prototype.draw = function(t) {
+      this.updateTweens(t);
+
+      this.drawCircle(
+          this.radiusTween_.getValue(),
+          this.leftTween_.getValue(),
+          this.topTween_.getValue());
+
+      this.element.style.opacity = this.opacityTween.getValue();
+    };
+ }(Polymer))
+</script>
