@@ -12,6 +12,7 @@ env:
 node_js: stable
 addons:
   firefox: latest
+  sauce_connect: true
   apt:
     sources:
       - google-chrome
