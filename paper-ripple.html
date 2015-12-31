@@ -553,7 +553,7 @@ Apply `circle` class to make the rippling effect within a circle.
         var ownerRoot = Polymer.dom(this).getOwnerRoot();
         var target;
 
-        if (this.parentNode.nodeType == 11) { // DOCUMENT_FRAGMENT_NODE
+        if (Polymer.dom(this).parentNode.nodeType == 11) { // DOCUMENT_FRAGMENT_NODE
           target = ownerRoot.host;
         } else {
           target = this.parentNode;
