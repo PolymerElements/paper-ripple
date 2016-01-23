@@ -67,6 +67,14 @@ Apply `circle` class to make the rippling effect within a circle.
 
     <paper-ripple class="circle"></paper-ripple>
 
+### Styling
+
+The following custom properties and mixins are available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-ripple` | Mixin applied to the ripple | `{}`
+
 @group Paper Elements
 @element paper-ripple
 @hero hero.svg
@@ -92,6 +100,8 @@ Apply `circle` class to make the rippling effect within a circle.
          * handler "interrupts" that event handler (which happens when the
          * ripple is created on demand) */
         pointer-events: none;
+        
+        @apply(--paper-ripple);
       }
 
       :host([animating]) {
