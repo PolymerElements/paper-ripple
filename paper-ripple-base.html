@@ -1,0 +1,135 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!--
+Base class for drawing a circular ripple.
+-->
+
+<link rel="import" href="paper-clock.html">
+<link rel="import" href="paper-tween.html">
+
+<script>
+  (function(scope) {
+    /**
+    * @param {!PaperClock} clock
+    * @constructor
+    */
+    scope.Ripple = function(clock) {
+      /**
+      * @protected {!PaperTween}
+      */
+      this.opacityTween = new Polymer.PaperTween(clock);
+
+      /**
+      * The container for this ripple.
+      * @protected {Element}
+      */
+      this.container = null;
+
+      /**
+      * The underlying ripple element/shape.
+      * @protected {Element}
+      */
+      this.element = null;
+
+      /**
+      * Set of property tweens associated with this ripple.
+      * @protected {!Array<!PaperTween>}
+      */
+      this.tweens = [this.opacityTween];
+
+      /** @private {boolean} */
+      this.isExiting_ = false;
+    };
+    var Ripple = scope.Ripple;
+
+
+    /**
+    * Create and attach the ripple element to the container.
+    * @param {!Element} container
+    * @param {string} rgbaColor
+    * @protected
+    */
+    Ripple.prototype.initDom = function(container, rgbaColor) {
+      this.container = container;
+      this.element = document.createElement('div');
+      this.element.style.backgroundColor = rgbaColor;
+      this.element.style.opacity = 0;
+      this.element.style.position = 'absolute';
+      // Turns element into a circle.
+      this.element.style.borderRadius = '50%';
+       /* This prevents gestures from getting confused when the event target changes. */
+      this.element.style.pointerEvents = 'none';
+
+       Polymer.dom(this.container).appendChild(this.element);
+    };
+
+
+    /**
+    * @param {number} t
+    * @protected
+    */
+    Ripple.prototype.updateTweens = function(t) {
+      this.tweens.forEach(function(each) {
+        each.update(t);
+      });
+    };
+
+
+    /**
+    * Draw circle centered at (leftPx, topPx).
+    * @param {number} radius
+    * @param {number} leftPx
+    * @param {number} topPx
+    * @protected
+    */
+    Ripple.prototype.drawCircle = function(radius, leftPx, topPx) {
+      var diameter = Math.ceil(radius * 2);
+      this.element.style.width = diameter + 'px';
+      this.element.style.height = diameter + 'px';
+      this.element.style.top = (-radius + topPx) + 'px';
+      this.element.style.left = (-radius + leftPx) + 'px';
+    };
+
+
+    /** @return {boolean} */
+    Ripple.prototype.isAnimating = function() {
+      return this.opacityTween.getValue() > 0;
+    };
+
+
+    /** Remove this ripple from the parent container. */
+    Ripple.prototype.remove = function() {
+      Polymer.dom(this.container).removeChild(this.element);
+    };
+
+
+    /**
+    * Setup ripple for enter, "pressed" animation.
+    */
+    Ripple.prototype.enter = function() {
+      this.isExiting_ = false;
+    };
+
+
+    /**
+    * Setup ripple for exit, "tapped"/"released" animation.
+    */
+    Ripple.prototype.exit = function() {
+      this.isExiting_ = true;
+    };
+
+
+    /** @return {boolean} */
+    Ripple.prototype.isExiting = function() {
+      return this.isExiting_;
+    };
+  })(Polymer);
+</script>
