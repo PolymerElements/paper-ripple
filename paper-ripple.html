@@ -93,16 +93,10 @@ Apply `circle` class to make the rippling effect within a circle.
          * handler "interrupts" that event handler (which happens when the
          * ripple is created on demand) */
         pointer-events: none;
-      }
 
-      :host([animating]) {
         /* This resolves a rendering issue in Chrome (as of 40) where the
            ripple is not properly clipped by its parent (which may have
-           rounded corners). See: http://jsbin.com/temexa/4
-
-           Note: We only apply this style conditionally. Otherwise, the browser
-           will create a new compositing layer for every ripple element on the
-           page, and that would be bad. */
+           rounded corners). See: http://jsbin.com/temexa/4 */
         -webkit-transform: translate(0, 0);
         transform: translate3d(0, 0, 0);
       }
