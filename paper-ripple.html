@@ -657,7 +657,9 @@ Apply `circle` class to make the rippling effect within a circle.
           ripple.upAction(event);
         });
 
-        this.animate();
+        if (!this._animating) {
+          this.animate();
+        }
       },
 
       onAnimationComplete: function() {
