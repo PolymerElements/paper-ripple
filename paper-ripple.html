@@ -554,10 +554,10 @@ Apply `circle` class to make the rippling effect within a circle.
         var ownerRoot = Polymer.dom(this).getOwnerRoot();
         var target;
 
-        if (this.isChildOfFragmentNode) {
+        if (this.savedParentNode.nodeType == 11) { // DOCUMENT_FRAGMENT_NODE
           target = ownerRoot.host;
         } else {
-          target = this.parentNode;
+          target = this.savedParentNode;
         }
 
         return target;
@@ -575,7 +575,7 @@ Apply `circle` class to make the rippling effect within a circle.
         // handle key events. The key handlers deal with `noink` themselves.
         this.keyEventTarget = this.target;
         // Type 11 is a DOCUMENT_FRAGMENT_NODE.
-        this.isChildOfFragmentNode = this.parentNode.nodeType == 11;
+        this.savedParentNode = this.parentNode;
         this.listen(this.target, 'up', 'uiUpAction');
         this.listen(this.target, 'down', 'uiDownAction');
       },
