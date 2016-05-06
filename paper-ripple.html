@@ -554,7 +554,7 @@ Apply `circle` class to make the rippling effect within a circle.
         var ownerRoot = Polymer.dom(this).getOwnerRoot();
         var target;
 
-        if (this.parentNode.nodeType == 11) { // DOCUMENT_FRAGMENT_NODE
+        if (this.isChildOfFragmentNode) {
           target = ownerRoot.host;
         } else {
           target = this.parentNode;
@@ -574,6 +574,8 @@ Apply `circle` class to make the rippling effect within a circle.
         // so that space and enter activate the ripple even if the target doesn't
         // handle key events. The key handlers deal with `noink` themselves.
         this.keyEventTarget = this.target;
+        // Type 11 is a DOCUMENT_FRAGMENT_NODE.
+        this.isChildOfFragmentNode = this.parentNode.nodeType == 11;
         this.listen(this.target, 'up', 'uiUpAction');
         this.listen(this.target, 'down', 'uiDownAction');
       },
