@@ -213,11 +213,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
       });
 
-      suite('avoid double transitioned event', function () {
+      suite('avoid double transitionend event', function () {
         setup(function () {
           rippleContainer = fixture('NoRipple');
         });
-        test('the transitioned event should only fire once', function (done) {
+        test('the transitionend event should only fire once', function (done) {
           var ripple = document.createElement('paper-ripple');
           var transitionedEventCount = 0;
           ripple.addEventListener('transitionend', function() {
