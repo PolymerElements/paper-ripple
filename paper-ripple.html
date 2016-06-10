@@ -555,28 +555,23 @@ Apply `circle` class to make the rippling effect within a circle.
       },
 
       keyBindings: {
+        'down': 'uiDownAction',
         'enter:keydown': '_onEnterKeydown',
         'space:keydown': '_onSpaceKeydown',
-        'space:keyup': '_onSpaceKeyup'
+        'space:keyup': '_onSpaceKeyup',
+        'up': 'uiUpAction'
       },
 
       attached: function() {
         // Set up a11yKeysBehavior to listen to key events on the target,
-        // so that space and enter activate the ripple even if the target doesn't
-        // handle key events. The key handlers deal with `noink` themselves.
+        // so that space and enter activate the ripple even if the target
+        // doesn't handle key events. The key handlers deal with `noink`
+        // themselves.
         if (this.parentNode.nodeType == 11) { // DOCUMENT_FRAGMENT_NODE
           this.keyEventTarget = Polymer.dom(this).getOwnerRoot().host;
         } else {
           this.keyEventTarget = this.parentNode;
         }
-        this.listen(this.keyEventTarget, 'up', 'uiUpAction');
-        this.listen(this.keyEventTarget, 'down', 'uiDownAction');
-      },
-
-      detached: function() {
-        this.unlisten(this.keyEventTarget, 'up', 'uiUpAction');
-        this.unlisten(this.keyEventTarget, 'down', 'uiDownAction');
-        this.keyEventTarget = null;
       },
 
       get shouldKeepAnimating () {
