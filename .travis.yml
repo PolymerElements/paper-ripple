@@ -10,7 +10,7 @@ env:
     - secure: NZv74uwtibMbmarEOWRUNkEwjz/2akWEIe2JDxglag2JUECWrcAKJIQUqYsO0KNUIg09xJEqWLWED4fN73p3z27Jl/z99ssVMvPQt8duoxwZ6UwcjVWUQNjgXKN6JDZCf+3hJsmU51Lp6mpzj0Y5m8nCjhh7/bBnJahH+VRm7bA=
 node_js: stable
 addons:
-  firefox: latest
+  firefox: '46.0'
   apt:
     sources:
       - google-chrome
