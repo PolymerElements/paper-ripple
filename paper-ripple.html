@@ -576,7 +576,7 @@ Apply `circle` class to make the rippling effect within a circle.
       detached: function() {
         this.unlisten(this.keyEventTarget, 'up', 'uiUpAction');
         this.unlisten(this.keyEventTarget, 'down', 'uiDownAction');
-        this.keyEventTarget = null;
+        this.keyEventTarget = this;
       },
 
       get shouldKeepAnimating () {
