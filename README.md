@@ -42,7 +42,21 @@ manually route the down and up actions to the ripple element.  Note that it is
 important if you call `downAction()` you will have to make sure to call
 `upAction()` so that `paper-ripple` would end the animation loop.
 
-Example:
+Example (using Polymer's `on-down` and `on-up`):
+
+```html
+<my-el on-down="downAction" on-up="upAction"></my-el>
+<paper-ripple id="ripple" style="pointer-events: none;"></paper-ripple>
+...
+downAction: function(e) {
+  this.$.ripple.downAction(e);
+},
+upAction: function(e) {
+  this.$.ripple.upAction();
+}
+```
+
+Example (listening to `mousedown` and `mouseup` events):
 
 ```html
 <paper-ripple id="ripple" style="pointer-events: none;"></paper-ripple>
@@ -86,5 +100,3 @@ Apply `circle` class to make the rippling effect within a circle.
 ```html
 <paper-ripple class="circle"></paper-ripple>
 ```
-
-
