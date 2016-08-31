@@ -150,6 +150,8 @@ Apply `circle` class to make the rippling effect within a circle.
 </dom-module>
 <script>
   (function() {
+    'use strict';
+
     var Utility = {
       distance: function(x1, y1, x2, y2) {
         var xDelta = (x1 - x2);
@@ -533,7 +535,7 @@ Apply `circle` class to make the rippling effect within a circle.
          * Calling ripple's imperative api like `simulatedRipple` will
          * still generate the ripple effect.
          */
-        noink: {
+        noInk: {
           type: Boolean,
           value: false
         },
@@ -563,7 +565,7 @@ Apply `circle` class to make the rippling effect within a circle.
       attached: function() {
         // Set up a11yKeysBehavior to listen to key events on the target,
         // so that space and enter activate the ripple even if the target doesn't
-        // handle key events. The key handlers deal with `noink` themselves.
+        // handle key events. The key handlers deal with `noInk` themselves.
         if (this.parentNode.nodeType == 11) { // DOCUMENT_FRAGMENT_NODE
           this.keyEventTarget = Polymer.dom(this).getOwnerRoot().host;
         } else {
@@ -601,18 +603,18 @@ Apply `circle` class to make the rippling effect within a circle.
 
       /**
        * Provokes a ripple down effect via a UI event,
-       * respecting the `noink` property.
+       * respecting the `noInk` property.
        * @param {Event=} event
        */
       uiDownAction: function(event) {
-        if (!this.noink) {
+        if (!this.noInk) {
           this.downAction(event);
         }
       },
 
       /**
        * Provokes a ripple down effect via a UI event,
-       * *not* respecting the `noink` property.
+       * *not* respecting the `noInk` property.
        * @param {Event=} event
        */
       downAction: function(event) {
@@ -632,18 +634,18 @@ Apply `circle` class to make the rippling effect within a circle.
 
       /**
        * Provokes a ripple up effect via a UI event,
-       * respecting the `noink` property.
+       * respecting the `noInk` property.
        * @param {Event=} event
        */
       uiUpAction: function(event) {
-        if (!this.noink) {
+        if (!this.noInk) {
           this.upAction(event);
         }
       },
 
       /**
        * Provokes a ripple up effect via a UI event,
-       * *not* respecting the `noink` property.
+       * *not* respecting the `noInk` property.
        * @param {Event=} event
        */
       upAction: function(event) {
@@ -737,7 +739,7 @@ Apply `circle` class to make the rippling effect within a circle.
         this.uiUpAction();
       },
 
-      // note: holdDown does not respect noink since it can be a focus based
+      // note: holdDown does not respect noInk since it can be a focus based
       // effect.
       _holdDownChanged: function(newVal, oldVal) {
         if (oldVal === undefined) {

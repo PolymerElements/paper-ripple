@@ -55,10 +55,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
-  <test-fixture id="NoinkTarget">
+  <test-fixture id="NoInkTarget">
     <template>
       <div id="RippleContainer">
-        <paper-ripple noink></paper-ripple>
+        <paper-ripple no-ink></paper-ripple>
       </div>
     </template>
   </test-fixture>
@@ -109,8 +109,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           expect(ripple.ripples.length).to.be.eql(1);
         });
 
-        test('generates a ripple when noink', function() {
-          ripple.noink = true;
+        test('generates a ripple when noInk', function() {
+          ripple.noInk = true;
           ripple.holdDown = true;
           expect(ripple.ripples.length).to.be.eql(1);
 
@@ -118,9 +118,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       });
 
-      suite('when target is noink', function () {
+      suite('when target is noInk', function () {
         setup(function () {
-          rippleContainer = fixture('NoinkTarget');
+          rippleContainer = fixture('NoInkTarget');
           ripple = rippleContainer.firstElementChild;
         });
 
@@ -215,7 +215,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           var ripple = document.createElement('paper-ripple');
           Polymer.dom(rippleContainer).appendChild(ripple);
           Polymer.dom(rippleContainer).removeChild(ripple);
-          
+
           ripple.addEventListener('transitionend', function() {
             expect(ripple.parentNode).to.be.ok;
             Polymer.dom(document.body).removeChild(ripple);
