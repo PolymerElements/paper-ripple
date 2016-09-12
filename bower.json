@@ -18,25 +18,29 @@
   },
   "main": "paper-ripple.html",
   "dependencies": {
-    "iron-a11y-keys-behavior": "https://github.com/notwaldorf/iron-a11y-keys-behavior.git#2.0-preview",
-    "polymer": "https://github.com/PolymerLabs/alacarte.git#master"
+    "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#2.0-preview",
+    "polymer": "Polymer/polymer#2.0-preview"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.0.0",
-    "iron-icon": "polymerelements/iron-icon#^1.0.0",
-    "iron-icons": "polymerelements/iron-icons#^1.0.0",
-    "iron-test-helpers": "https://github.com/notwaldorf/iron-test-helpers.git#2.0-preview",
-    "iron-demo-helpers": "https://github.com/notwaldorf/iron-demo-helpers.git#2.0-preview",
+    "iron-icon": "polymerelements/iron-icon#2.0-preview",
+    "iron-icons": "polymerelements/iron-icons#2.0-preview",
+    "iron-test-helpers": "PolymerElements/iron-test-helpers#2.0-preview",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#2.0-preview",
     "test-fixture": "PolymerElements/test-fixture#custom-elements-v1",
     "web-component-tester": "^4.0.0",
-    "webcomponentsjs": "webcomponents/webcomponentsjs#v1-polymer-edits"
+    "webcomponentsjs": "webcomponents/webcomponentsjs#v1"
   },
   "ignore": [],
   "resolutions": {
     "iron-a11y-keys-behavior": "2.0-preview",
     "iron-flex-layout": "2.0-preview",
     "test-fixture": "custom-elements-v1",
-    "polymer": "master",
-    "webcomponentsjs": "v1-polymer-edits"
+    "polymer": "2.0-preview",
+    "iron-icon": "2.0-preview",
+    "iron-icons": "2.0-preview",
+    "webcomponentsjs": "v1",
+    "iron-iconset-svg": "2.0-preview",
+    "iron-meta": "2.0-preview"
   }
 }
