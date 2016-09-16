@@ -55,10 +55,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
-  <test-fixture id="NoInkTarget">
+  <test-fixture id="NoinkTarget">
     <template>
       <div id="RippleContainer">
-        <paper-ripple no-ink></paper-ripple>
+        <paper-ripple noink></paper-ripple>
       </div>
     </template>
   </test-fixture>
@@ -109,8 +109,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           expect(ripple.ripples.length).to.be.eql(1);
         });
 
-        test('generates a ripple when noInk', function() {
-          ripple.noInk = true;
+        test('generates a ripple when noink', function() {
+          ripple.noink = true;
           ripple.holdDown = true;
           expect(ripple.ripples.length).to.be.eql(1);
 
@@ -118,9 +118,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       });
 
-      suite('when target is noInk', function () {
+      suite('when target is noink', function () {
         setup(function () {
-          rippleContainer = fixture('NoInkTarget');
+          rippleContainer = fixture('NoinkTarget');
           ripple = rippleContainer.firstElementChild;
         });
 
