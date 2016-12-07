@@ -31,6 +31,24 @@
     "web-component-tester": "^4.0.0",
     "webcomponentsjs": "webcomponents/webcomponentsjs#v1"
   },
+  "variants": {
+    "1.x": {
+      "dependencies": {
+        "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#^1.0.0",
+        "polymer": "Polymer/polymer#^1.7.0"
+      },
+      "devDependencies": {
+        "iron-component-page": "polymerelements/iron-component-page#^1.0.0",
+        "iron-icon": "polymerelements/iron-icon#^1.0.0",
+        "iron-icons": "polymerelements/iron-icons#^1.0.0",
+        "iron-test-helpers": "PolymerElements/iron-test-helpers#^1.0.0",
+        "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^1.0.0",
+        "test-fixture": "PolymerElements/test-fixture#^1.0.0",
+        "web-component-tester": "^4.0.0",
+        "webcomponentsjs": "webcomponents/webcomponentsjs#^0.7.0"
+      }
+    }
+  },
   "ignore": [],
   "resolutions": {
     "iron-a11y-keys-behavior": "2.0-preview",
