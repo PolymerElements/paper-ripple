@@ -94,7 +94,7 @@ By default, the ripple is centered on the point of contact.
         }
       }
 
-      :host {
+      #ripple {
         display: block;
         position: absolute;
         top: 0;
@@ -111,6 +111,7 @@ By default, the ripple is centered on the point of contact.
         opacity: 0;
       }
     </style>
+    <div id="ripple"></div>
   </template>
 </dom-module>
 <script>
@@ -121,24 +122,40 @@ By default, the ripple is centered on the point of contact.
       /**
        * If true, ripples will center inside its container
        *
-       * @attribute recenters
+       * @attribute center
        * @type boolean
        * @default false
        */
-      centers: {
+      center: {
+        type: Boolean,
+        value: false
+      },
+      /**
+       * If true, the ripple will not generate a ripple effect
+       * via pointer interaction.
+       * Calling ripple's imperative api like `simulatedRipple` will
+       * still generate the ripple effect.
+       *
+       * @type boolean
+       * @default false
+       */
+      noink: {
         type: Boolean,
         value: false
       }
     },
 
     attached: function() {
-      this._eventTarget = Polymer.dom(this).parentNode;
-      this.listen(this._eventTarget, 'down', '_downHandler');
+      /* Legacy */
+      this._eventTarget = this.parentNode.nodeType == 11 ?
+          Polymer.dom(this).getOwnerRoot().host : this.parentNode;
+      this.listen(this._eventTarget, 'down', 'uiDownAction');
       this.listen(this._eventTarget, 'keydown', '_keydownHandler');
     },
 
     detached: function() {
-      this.unlisten(this._eventTarget, 'down', '_downHandler');
+      /* Legacy */
+      this.unlisten(this._eventTarget, 'down', 'uiDownAction');
       this.unlisten(this._eventTarget, 'keydown', '_keydownHandler');
       this._eventTarget = null;
     },
@@ -147,33 +164,38 @@ By default, the ripple is centered on the point of contact.
       if (!this._eventTarget) {
         return;
       }
-      var diameter = this.centers ? Math.max(rect.width, rect.height) :
+      var diameter = this.center ? Math.max(rect.width, rect.height) :
           Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 1.5;
-      var style = this.style;
+      var style = this.$.ripple.style;
       var x = point.x - rect.left - diameter/2;
       var y = point.y - rect.top - diameter/2;
       style.width = diameter + 'px';
       style.height = diameter + 'px';
       style.top = y + 'px';
       style.left = x + 'px'
-
-      if (~~style.animationName.indexOf('ripple-expand-1')) {
-        style.animationName = 'ripple-expand-1,ripple-fade-in-out-1';
-      } else {
-        style.animationName = 'ripple-expand-2,ripple-fade-in-out-2';
-      }
+      style.animationName = ~~style.animationName.indexOf('ripple-expand-1') ?
+          'ripple-expand-1,ripple-fade-in-out-1' : 'ripple-expand-2,ripple-fade-in-out-2';
     },
 
-    _downHandler: function(event) {
+    /* Legacy */
+    downAction: function(event) {
       this._debounceRaf(function() {
         var rect = this._eventTarget.getBoundingClientRect();
-        this._showRipple(rect, this.centers ? {
+        this._showRipple(rect, this.center ? {
           x: rect.left + rect.width/2,
           y: rect.top + rect.height/2
         } : event.detail);
       });
     },
 
+    /* Legacy */
+    uiDownAction: function(event) {
+      if (!this.noink) {
+        this.downAction(event);
+      }
+    },
+
+    /* Legacy */
     _keydownHandler: function(event) {
       if (event.keyCode != 13) {
         return;
