@@ -17,17 +17,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <meta name="apple-mobile-web-app-capable" content="yes">
 
   <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
-
+  <link rel="import" href="../../polymer/polymer.html">
   <link rel="import" href="../../iron-icons/iron-icons.html">
-  <link rel="import" href="../paper-ripple.html">
   <link rel="import" href="../../paper-styles/typography.html">
   <link rel="import" href="../../iron-icon/iron-icon.html">
+  <link rel="import" href="../paper-ripple.html">
 
   <style>
 
     body {
       background-color: #f9f9f9;
       font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
+      user-select: none;
       -webkit-tap-highlight-color: rgba(0,0,0,0);
       -webkit-touch-callout: none;
     }
@@ -51,12 +52,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       font-size: 0.9em;
       background-color: #fff;
       color: #646464;
-    }
-
-    .button > paper-ripple {
-      border-radius: 2px;
       overflow: hidden;
     }
+
 
     .button.narrow {
       width: 60px;
@@ -139,6 +137,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       transition-delay: 0.2s;
       box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+      will-change: opacity;
     }
 
     .fab.red {
@@ -180,6 +179,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       line-height: 48px;
       color: #646464;
       font-size: 0.9em;
+      overflow: hidden;
     }
 
     .menu.blue > .item {
@@ -195,6 +195,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       vertical-align: top;
       background-color: #fff;
       box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
+      overflow: hidden;
     }
 
     .dialog {
@@ -295,22 +296,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="icon-button">
       <iron-icon icon="menu" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle" centers></paper-ripple>
     </div>
 
     <div class="icon-button">
       <iron-icon icon="more-vert" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle" centers></paper-ripple>
     </div>
 
     <div class="icon-button red">
       <iron-icon icon="delete" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle" centers></paper-ripple>
     </div>
 
     <div class="icon-button blue">
       <iron-icon icon="account-box" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle" centers></paper-ripple>
     </div>
 
   </section>
@@ -319,17 +320,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <div class="fab red">
       <iron-icon icon="add" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle"></paper-ripple>
     </div>
 
     <div class="fab blue">
       <iron-icon icon="mail" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle"></paper-ripple>
     </div>
 
     <div class="fab green">
       <iron-icon icon="create" tabindex="1"></iron-icon>
-      <paper-ripple class="circle" recenters></paper-ripple>
+      <paper-ripple class="circle"></paper-ripple>
     </div>
 
   </section>
