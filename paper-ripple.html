@@ -94,13 +94,16 @@ By default, the ripple is centered on the point of contact.
         }
       }
 
-      #ripple {
-        display: block;
+      :host {
         position: absolute;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
+        contain: strict;
+      }
+
+      #ripple {
         pointer-events: none;
         background-color: currentColor;
         will-change: transform, opacity;
@@ -142,6 +145,16 @@ By default, the ripple is centered on the point of contact.
       noink: {
         type: Boolean,
         value: false
+      },
+
+      /**
+       * If true, the ripple will remain in the "down" state until `holdDown`
+       * is set to false again.
+       */
+      holdDown: {
+        type: Boolean,
+        value: false,
+        observer: '_holdDownChanged'
       }
     },
 
@@ -169,23 +182,46 @@ By default, the ripple is centered on the point of contact.
       var style = this.$.ripple.style;
       var x = point.x - rect.left - diameter/2;
       var y = point.y - rect.top - diameter/2;
+      var animations = [];
+
       style.width = diameter + 'px';
       style.height = diameter + 'px';
-      style.top = y + 'px';
-      style.left = x + 'px'
-      style.animationName = ~~style.animationName.indexOf('ripple-expand-1') ?
-          'ripple-expand-1,ripple-fade-in-out-1' : 'ripple-expand-2,ripple-fade-in-out-2';
+      style.marginTop = y + 'px';
+      style.marginLeft = x + 'px'
+
+      animations.push(style.animationName.indexOf('ripple-expand-1') >= 0
+        ? 'ripple-expand-2'
+        : 'ripple-expand-1'
+      );
+
+      if (this.holdDown) {
+        style.opacity = 0.25;
+      } else {
+        style.opacity = 0;
+        animations.push(style.animationName.indexOf('ripple-fade-in-out-1') >= 0
+          ? 'ripple-fade-in-out-2'
+          : 'ripple-fade-in-out-1'
+        );
+      }
+      style.animationName = animations.join();
+    },
+
+    _debounceRaf: function(origin) {
+      cancelAnimationFrame(this._rafTask);
+      var self = this;
+
+      this._rafTask = requestAnimationFrame(function() {
+        var rect = self.getBoundingClientRect();
+        self._showRipple(rect, origin || {
+          x: rect.left + rect.width/2,
+          y: rect.top + rect.height/2
+        });
+      });
     },
 
     /* Legacy */
     downAction: function(event) {
-      this._debounceRaf(function() {
-        var rect = this._eventTarget.getBoundingClientRect();
-        this._showRipple(rect, this.center ? {
-          x: rect.left + rect.width/2,
-          y: rect.top + rect.height/2
-        } : event.detail);
-      });
+      this._debounceRaf(this.center ? null : event.detail);
     },
 
     /* Legacy */
@@ -197,21 +233,17 @@ By default, the ripple is centered on the point of contact.
 
     /* Legacy */
     _keydownHandler: function(event) {
-      if (event.keyCode != 13) {
-        return;
+      if (event.keyCode == /* ENTER */ 13) {
+        this._debounceRaf(null);
       }
-      this._debounceRaf(function() {
-        var rect = this._eventTarget.getBoundingClientRect();
-        this._showRipple(rect, {
-          x: rect.left + rect.width/2,
-          y: rect.top + rect.height/2
-        });
-      });
     },
 
-    _debounceRaf: function(cb) {
-      cancelAnimationFrame(this._rafTask);
-      this._rafTask = requestAnimationFrame(cb.bind(this));
+    _holdDownChanged: function(holdDown, prevHoldDown) {
+      if (holdDown) {
+        this._debounceRaf(null);
+      } else if (prevHoldDown) {
+        this.$.ripple.style.animationName = 'ripple-fade-in-out-1';
+      }
     }
   });
 </script>
