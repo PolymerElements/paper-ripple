@@ -109,7 +109,7 @@ By default, the ripple is centered on the point of contact.
         pointer-events: none;
         background-color: currentColor;
         will-change: transform, opacity;
-        animation-duration: 0.4s;
+        animation-duration: 0.3s;
         animation-fill-mode: forwards, none;
         animation-timing-function: cubic-bezier(.157, .72, .386, .987), linear;
         border-radius: 50%;
@@ -124,6 +124,12 @@ By default, the ripple is centered on the point of contact.
     is: 'paper-ripple',
 
     properties: {
+
+      /* Legacy */
+      recenters: {
+        type: Boolean,
+        value: false
+      },
       /**
        * If true, ripples will center inside its container
        *
@@ -177,12 +183,13 @@ By default, the ripple is centered on the point of contact.
       this._eventTarget = null;
     },
 
-    _showRipple(rect, point) {
+    _showRipple: function(rect, point) {
       if (!this._eventTarget) {
         return;
       }
-      var diameter = this.center ? Math.max(rect.width, rect.height) :
-          Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 1.5;
+      var diameter = this.center || this.recenters
+          ? Math.max(rect.width, rect.height)
+          : Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 1.5;
       var style = this.$.ripple.style;
       var x = point.x - rect.left - diameter/2;
       var y = point.y - rect.top - diameter/2;
@@ -197,7 +204,7 @@ By default, the ripple is centered on the point of contact.
         ? 'ripple-expand-2'
         : 'ripple-expand-1'
       );
-      if (this.holdDown || this.center) {
+      if (this.holdDown || this.center || this.recenters) {
         style.opacity = 0.25;
       } else {
         style.opacity = 0;
@@ -224,7 +231,7 @@ By default, the ripple is centered on the point of contact.
 
     /* Legacy */
     downAction: function(event) {
-      this._debounceRaf(this.center ? null : event.detail);
+      this._debounceRaf(this.center || this.recenters ? null : event.detail);
     },
 
     /* Legacy */
@@ -235,13 +242,20 @@ By default, the ripple is centered on the point of contact.
     },
 
     /* Legacy */
-    uiUpAction: function(event) {
-      if (this.center) {
+    upAction: function(event) {
+      if (!this.holdDown && (this.center || this.recenters)) {
         var style = this.$.ripple.style;
         style.animationName = style.animationName.indexOf('ripple-expand-1') >= 0
           ? 'ripple-expand-1, ripple-fade-in-out-1'
           : 'ripple-expand-2, ripple-fade-in-out-1';
         style.opacity = 0;
+      }
+    },
+
+    /* Legacy */
+    uiUpAction: function(event) {
+      if (!this.noink) {
+        this.upAction(event);
       }
     },
 
