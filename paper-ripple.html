@@ -52,7 +52,7 @@ By default, the ripple is centered on the point of contact.
 <dom-module id="paper-ripple">
   <template>
     <style>
-      @keyframes ripple-fade-in-out-1 {
+      @keyframes ripple-fade-in-out {
         0% {
           opacity: 0.25;
         }
@@ -64,28 +64,7 @@ By default, the ripple is centered on the point of contact.
         }
       }
 
-      @keyframes ripple-fade-in-out-2 {
-        0% {
-          opacity: 0.25;
-        }
-        10% {
-          opacity: 0.25;
-        }
-        100% {
-          opacity: 0;
-        }
-      }
-
-      @keyframes ripple-expand-1 {
-        0% {
-          transform: scale(0);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-
-      @keyframes ripple-expand-2 {
+      @keyframes ripple-expand {
         0% {
           transform: scale(0);
         }
@@ -110,7 +89,6 @@ By default, the ripple is centered on the point of contact.
         background-color: currentColor;
         will-change: transform, opacity;
         animation-duration: 0.3s;
-        animation-fill-mode: forwards, none;
         animation-timing-function: cubic-bezier(.157, .72, .386, .987), linear;
         border-radius: 50%;
         opacity: 0;
@@ -183,55 +161,76 @@ By default, the ripple is centered on the point of contact.
       this._eventTarget = null;
     },
 
-    _showRipple: function(rect, point) {
+    _showRipple: function(rect, holdDown, point) {
       if (!this._eventTarget) {
         return;
       }
-      var diameter = this.center || this.recenters
-          ? Math.max(rect.width, rect.height)
-          : Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 1.5;
-      var style = this.$.ripple.style;
-      var x = point.x - rect.left - diameter/2;
-      var y = point.y - rect.top - diameter/2;
-      var animations = [];
+      var centers = this.center || this.recenters,
+          diameter = centers
+            ? Math.max(rect.width, rect.height)
+            : Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 1.5,
+          style = this.$.ripple.style,
+          x = point.x - rect.left - diameter/2,
+          y = point.y - rect.top - diameter/2;
 
       style.width = diameter + 'px';
       style.height = diameter + 'px';
       style.marginTop = y + 'px';
       style.marginLeft = x + 'px'
 
-      animations.push(style.animationName.indexOf('ripple-expand-1') >= 0
-        ? 'ripple-expand-2'
-        : 'ripple-expand-1'
-      );
-      if (this.holdDown || this.center || this.recenters) {
+      if (holdDown) {
         style.opacity = 0.25;
+        style.animationName = 'ripple-expand, none';
       } else {
         style.opacity = 0;
-        animations.push(style.animationName.indexOf('ripple-fade-in-out-1') >= 0
-          ? 'ripple-fade-in-out-2'
-          : 'ripple-fade-in-out-1'
-        );
+        style.animationName = 'ripple-expand, ripple-fade-in-out';
       }
-      style.animationName = animations.join();
     },
 
-    _debounceRaf: function(origin) {
+    _debounceRaf: function(fn) {
+      this.$.ripple.style.animationName = '';
       cancelAnimationFrame(this._rafTask);
-      var self = this;
+      this._rafTask = requestAnimationFrame(fn.bind(this));
+    },
 
-      this._rafTask = requestAnimationFrame(function() {
-        var rect = self.getBoundingClientRect();
-        self._showRipple(rect, origin || {
-          x: rect.left + rect.width/2,
-          y: rect.top + rect.height/2
-        });
-      });
+    _cleanUp: function() {
+      var style = this.$.ripple.style;
+      clearTimeout(this._cleanUpTask);
+      this._cleanUpTask = setTimeout(function() {
+        style.animationName = '';
+        style.opacity = 0;
+      }, 300);
     },
 
     /* Legacy */
     downAction: function(event) {
-      this._debounceRaf(this.center || this.recenters ? null : event.detail);
+      this._downActionTimeStamp = event.timeStamp;
+      this._debounceRaf(function() {
+        var rect = this.getBoundingClientRect(),
+            centers = this.center || this.recenters;
+        this._showRipple(rect,
+          centers || this.holdDown,
+          centers
+          ? {
+              x: rect.left + rect.width/2,
+              y: rect.top + rect.height/2
+            }
+          : event.detail
+        );
+      });
+    },
+
+    /* Legacy */
+    upAction: function(event) {
+      if (!this.holdDown && (this.center || this.recenters)) {
+        var style = this.$.ripple.style,
+            holdTime = event.timeStamp - this._downActionTimeStamp;
+        style.animationName = holdTime > 300
+          ? 'none, ripple-fade-in-out'
+          : 'ripple-expand, ripple-fade-in-out';
+        style.opacity = 0;
+        this._cleanUp();
+      }
     },
 
     /* Legacy */
@@ -242,35 +241,38 @@ By default, the ripple is centered on the point of contact.
     },
 
     /* Legacy */
-    upAction: function(event) {
-      if (!this.holdDown && (this.center || this.recenters)) {
-        var style = this.$.ripple.style;
-        style.animationName = style.animationName.indexOf('ripple-expand-1') >= 0
-          ? 'ripple-expand-1, ripple-fade-in-out-1'
-          : 'ripple-expand-2, ripple-fade-in-out-1';
-        style.opacity = 0;
-      }
-    },
-
-    /* Legacy */
     uiUpAction: function(event) {
       if (!this.noink) {
         this.upAction(event);
       }
     },
 
+    _centerRipple: function(holdDown) {
+      this._debounceRaf(function() {
+        var rect = this.getBoundingClientRect();
+        this._showRipple(rect, holdDown, {
+          x: rect.left + rect.width/2,
+          y: rect.top + rect.height/2
+        });
+        this._cleanUp();
+      });
+    },
+
     /* Legacy */
     _keydownHandler: function(event) {
       if (event.keyCode == /* ENTER */ 13) {
-        this._debounceRaf(null);
+        this._centerRipple(false);
       }
     },
 
     _holdDownChanged: function(holdDown, prevHoldDown) {
       if (holdDown) {
-        this._debounceRaf(null);
+        this._centerRipple(true);
       } else if (prevHoldDown) {
-        this.$.ripple.style.animationName = 'ripple-fade-in-out-1';
+        var style = this.$.ripple.style;
+        style.animationName = 'none, ripple-fade-in-out';
+        style.opacity = 0;
+        this._cleanUp();
       }
     }
   });
