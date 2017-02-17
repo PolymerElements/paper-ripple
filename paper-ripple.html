@@ -184,11 +184,11 @@ By default, the ripple is centered on the point of contact.
       } else {
         style.opacity = 0;
         style.animationName = 'ripple-expand, ripple-fade-in-out';
+        this._cleanUp();
       }
     },
 
     _debounceRaf: function(fn) {
-      this.$.ripple.style.animationName = '';
       cancelAnimationFrame(this._rafTask);
       this._rafTask = requestAnimationFrame(fn.bind(this));
     },
@@ -204,13 +204,15 @@ By default, the ripple is centered on the point of contact.
 
     /* Legacy */
     downAction: function(event) {
-      this._downActionTimeStamp = event.timeStamp;
+      var centers = this.center || this.recenters;
+
+      this.$.ripple.style.animationName = '';
+
       this._debounceRaf(function() {
-        var rect = this.getBoundingClientRect(),
-            centers = this.center || this.recenters;
+        var rect = this.getBoundingClientRect();
         this._showRipple(rect,
           centers || this.holdDown,
-          centers
+          centers || !event.detail
           ? {
               x: rect.left + rect.width/2,
               y: rect.top + rect.height/2
@@ -220,16 +222,20 @@ By default, the ripple is centered on the point of contact.
       });
     },
 
+    _centerRipple: function(holdDown) {
+      this._debounceRaf(function() {
+        var rect = this.getBoundingClientRect();
+        this._showRipple(rect, holdDown, {
+          x: rect.left + rect.width/2,
+          y: rect.top + rect.height/2
+        });
+      });
+    },
+
     /* Legacy */
     upAction: function(event) {
       if (!this.holdDown && (this.center || this.recenters)) {
-        var style = this.$.ripple.style,
-            holdTime = event.timeStamp - this._downActionTimeStamp;
-        style.animationName = holdTime > 300
-          ? 'none, ripple-fade-in-out'
-          : 'ripple-expand, ripple-fade-in-out';
-        style.opacity = 0;
-        this._cleanUp();
+        this._centerRipple(false);
       }
     },
 
@@ -247,33 +253,15 @@ By default, the ripple is centered on the point of contact.
       }
     },
 
-    _centerRipple: function(holdDown) {
-      this._debounceRaf(function() {
-        var rect = this.getBoundingClientRect();
-        this._showRipple(rect, holdDown, {
-          x: rect.left + rect.width/2,
-          y: rect.top + rect.height/2
-        });
-        this._cleanUp();
-      });
-    },
-
     /* Legacy */
     _keydownHandler: function(event) {
-      if (event.keyCode == /* ENTER */ 13) {
+      if (!this.noink && !this.holdDown && event.keyCode == /* ENTER */ 13) {
         this._centerRipple(false);
       }
     },
 
-    _holdDownChanged: function(holdDown, prevHoldDown) {
-      if (holdDown) {
-        this._centerRipple(true);
-      } else if (prevHoldDown) {
-        var style = this.$.ripple.style;
-        style.animationName = 'none, ripple-fade-in-out';
-        style.opacity = 0;
-        this._cleanUp();
-      }
+    _holdDownChanged: function(holdDown) {
+      this._centerRipple(holdDown);
     }
   });
 </script>
