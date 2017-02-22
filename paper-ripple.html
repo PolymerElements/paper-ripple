@@ -52,27 +52,6 @@ By default, the ripple is centered on the point of contact.
 <dom-module id="paper-ripple">
   <template>
     <style>
-      @keyframes ripple-fade-in-out {
-        0% {
-          opacity: 0.25;
-        }
-        10% {
-          opacity: 0.25;
-        }
-        100% {
-          opacity: 0;
-        }
-      }
-
-      @keyframes ripple-expand {
-        0% {
-          transform: scale(0);
-        }
-        100% {
-          transform: scale(1);
-        }
-      }
-
       :host {
         position: absolute;
         top: 0;
@@ -88,8 +67,6 @@ By default, the ripple is centered on the point of contact.
         pointer-events: none;
         background-color: currentColor;
         will-change: transform, opacity;
-        animation-duration: 0.3s;
-        animation-timing-function: cubic-bezier(.157, .72, .386, .987), linear;
         border-radius: 50%;
         opacity: 0;
       }
@@ -145,6 +122,9 @@ By default, the ripple is centered on the point of contact.
     },
 
     attached: function() {
+      this._CENTER = { x: 0, y: 0 };
+      this._origin = null;
+      this._rafTask = 0;
       /* Legacy */
       this._eventTarget = this.parentNode.nodeType == 11 ?
           Polymer.dom(this).getOwnerRoot().host : this.parentNode;
@@ -166,26 +146,37 @@ By default, the ripple is centered on the point of contact.
         return;
       }
       var centers = this.center || this.recenters,
+          offsetX = point.x - rect.left,
+          offsetY = point.y - rect.top,
           diameter = centers
             ? Math.max(rect.width, rect.height)
-            : Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 1.5,
-          style = this.$.ripple.style,
-          x = point.x - rect.left - diameter/2,
-          y = point.y - rect.top - diameter/2;
+            : Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 2,
+          style = this.$.ripple.style;
 
       style.width = diameter + 'px';
       style.height = diameter + 'px';
-      style.marginTop = y + 'px';
-      style.marginLeft = x + 'px'
+      style.marginTop = (offsetY - diameter/2) + 'px';
+      style.marginLeft = (offsetX - diameter/2) + 'px';
 
-      if (holdDown) {
-        style.opacity = 0.25;
-        style.animationName = 'ripple-expand, none';
-      } else {
-        style.opacity = 0;
-        style.animationName = 'ripple-expand, ripple-fade-in-out';
-        this._cleanUp();
+      if (style.opacity != '0.25') {
+        style.transition = '';
+        style.transform = centers 
+          ? 'translate(0, 0) scale(1)' 
+          : 'translate(0, 0) scale(0)';
+        style.opacity = '0.25';
       }
+      requestAnimationFrame(function() {
+        var translateX = rect.width/2 - offsetX;
+        var translateY = rect.height/2 - offsetY;
+        // Set up the transition
+        style.transitionProperty = 'transform, opacity';
+        style.transitionDuration = '0.3s, 0.2s';
+        style.transitionTimingFunction = 'ease-in, linear';
+        style.transitionDelay = '0s, 0.2s';
+        // Apply the properties
+        style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(1)';
+        style.opacity = holdDown ? '0.25' : '0';
+       });
     },
 
     _debounceRaf: function(fn) {
@@ -193,50 +184,31 @@ By default, the ripple is centered on the point of contact.
       this._rafTask = requestAnimationFrame(fn.bind(this));
     },
 
-    _cleanUp: function() {
-      var style = this.$.ripple.style;
-      clearTimeout(this._cleanUpTask);
-      this._cleanUpTask = setTimeout(function() {
-        style.animationName = '';
-        style.opacity = 0;
-      }, 300);
-    },
-
     /* Legacy */
     downAction: function(event) {
       var centers = this.center || this.recenters;
-
       this.$.ripple.style.animationName = '';
-
-      this._debounceRaf(function() {
-        var rect = this.getBoundingClientRect();
-        this._showRipple(rect,
-          centers || this.holdDown,
-          centers || !event.detail
-          ? {
-              x: rect.left + rect.width/2,
-              y: rect.top + rect.height/2
-            }
-          : event.detail
-        );
-      });
-    },
-
-    _centerRipple: function(holdDown) {
-      this._debounceRaf(function() {
-        var rect = this.getBoundingClientRect();
-        this._showRipple(rect, holdDown, {
-          x: rect.left + rect.width/2,
-          y: rect.top + rect.height/2
-        });
-      });
+      this._triggerRipple(centers || !event.detail ? this._CENTER : event.detail, true);
     },
 
     /* Legacy */
     upAction: function(event) {
-      if (!this.holdDown && (this.center || this.recenters)) {
-        this._centerRipple(false);
+      if (!this.holdDown) {
+        this._triggerRipple(this._origin, false);
       }
+    },
+
+    _triggerRipple: function(origin, holdDown) {
+      this._debounceRaf(function() {
+        var rect = this.getBoundingClientRect();
+        this._origin = origin === this._CENTER
+            ? {
+              x: rect.left + rect.width/2,
+              y: rect.top + rect.height/2
+            }
+            : origin;
+        this._showRipple(rect, holdDown, this._origin);
+      });
     },
 
     /* Legacy */
@@ -256,12 +228,12 @@ By default, the ripple is centered on the point of contact.
     /* Legacy */
     _keydownHandler: function(event) {
       if (!this.noink && !this.holdDown && event.keyCode == /* ENTER */ 13) {
-        this._centerRipple(false);
+        this._triggerRipple(this._CENTER, false);
       }
     },
 
     _holdDownChanged: function(holdDown) {
-      this._centerRipple(holdDown);
+      this._triggerRipple(this._CENTER, holdDown);
     }
   });
 </script>
