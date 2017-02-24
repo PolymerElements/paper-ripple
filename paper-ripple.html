@@ -80,7 +80,14 @@ By default, the ripple is centered on the point of contact.
 
     properties: {
 
-      /* Legacy */
+      /**
+       * If true, ripples will exhibit a gravitational pull towards
+       * the center of their container as they fade away.
+       *
+       * @attribute recenters
+       * @type boolean
+       * @default false
+       */
       recenters: {
         type: Boolean,
         value: false
@@ -109,7 +116,6 @@ By default, the ripple is centered on the point of contact.
         type: Boolean,
         value: false
       },
-
       /**
        * If true, the ripple will remain in the "down" state until `holdDown`
        * is set to false again.
@@ -135,7 +141,6 @@ By default, the ripple is centered on the point of contact.
     },
 
     detached: function() {
-      /* Legacy */
       this.unlisten(this._eventTarget, 'down', 'uiDownAction');
       this.unlisten(this._eventTarget, 'up', 'uiUpAction');
       this.unlisten(this._eventTarget, 'keydown', '_keydownHandler');
@@ -167,8 +172,8 @@ By default, the ripple is centered on the point of contact.
         style.opacity = '0.25';
       }
       requestAnimationFrame(function() {
-        var translateX = rect.width/2 - offsetX;
-        var translateY = rect.height/2 - offsetY;
+        var translateX = rect.width/2 - offsetX,
+            translateY = rect.height/2 - offsetY;
         // Set up the transition
         style.transitionProperty = 'transform, opacity';
         style.transitionDuration = '0.3s, 0.2s';
@@ -185,14 +190,22 @@ By default, the ripple is centered on the point of contact.
       this._rafTask = requestAnimationFrame(fn.bind(this));
     },
 
-    /* Legacy */
+    /**
+     * Provokes a ripple down effect via a UI event,
+     * *not* respecting the `noink` property.
+     * @param {Event=} event
+     */
     downAction: function(event) {
       var centers = this.center || this.recenters;
       this.$.ripple.style.animationName = '';
       this._triggerRipple(centers || !event.detail ? this._CENTER : event.detail, true);
     },
 
-    /* Legacy */
+    /**
+     * Provokes a ripple up effect via a UI event,
+     * *not* respecting the `noink` property.
+     * @param {Event=} event
+     */
     upAction: function(event) {
       if (!this.holdDown) {
         this._triggerRipple(this._origin, false);
@@ -212,21 +225,28 @@ By default, the ripple is centered on the point of contact.
       });
     },
 
-    /* Legacy */
+    /**
+     * Provokes a ripple down effect via a UI event,
+     * respecting the `noink` property.
+     * @param {Event=} event
+     */
     uiDownAction: function(event) {
       if (!this.noink) {
         this.downAction(event);
       }
     },
 
-    /* Legacy */
+    /**
+     * Provokes a ripple up effect via a UI event,
+     * respecting the `noink` property.
+     * @param {Event=} event
+     */
     uiUpAction: function(event) {
       if (!this.noink) {
         this.upAction(event);
       }
     },
 
-    /* Legacy */
     _keydownHandler: function(event) {
       if (!this.noink && !this.holdDown && event.keyCode == /* ENTER */ 13) {
         this._triggerRipple(this._CENTER, false);
@@ -236,5 +256,13 @@ By default, the ripple is centered on the point of contact.
     _holdDownChanged: function(holdDown) {
       this._triggerRipple(this._CENTER, holdDown);
     }
+
+    /**
+     * Fired when the animation finishes.
+     * This is useful if you want to wait until
+     * the ripple animation finishes to perform some action.
+     * @event transitionend
+     * @param {{node: Object}} detail Contains the animated node.
+     */
   });
 </script>
