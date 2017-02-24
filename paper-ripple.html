@@ -121,8 +121,9 @@ By default, the ripple is centered on the point of contact.
       }
     },
 
+    _CENTER: { x: 0, y: 0 },
+
     attached: function() {
-      this._CENTER = { x: 0, y: 0 };
       this._origin = null;
       this._rafTask = 0;
       /* Legacy */
@@ -141,13 +142,13 @@ By default, the ripple is centered on the point of contact.
       this._eventTarget = null;
     },
 
-    _showRipple: function(rect, holdDown, point) {
+    _showRipple: function(rect, holdDown, origin) {
       if (!this._eventTarget) {
         return;
       }
       var centers = this.center || this.recenters,
-          offsetX = point.x - rect.left,
-          offsetY = point.y - rect.top,
+          offsetX = origin.x - rect.left,
+          offsetY = origin.y - rect.top,
           diameter = centers
             ? Math.max(rect.width, rect.height)
             : Math.sqrt(rect.width*rect.width + rect.height*rect.height) * 2,
@@ -158,10 +159,10 @@ By default, the ripple is centered on the point of contact.
       style.marginTop = (offsetY - diameter/2) + 'px';
       style.marginLeft = (offsetX - diameter/2) + 'px';
 
-      if (style.opacity != '0.25') {
+      if (holdDown) {
         style.transition = '';
-        style.transform = centers 
-          ? 'translate(0, 0) scale(1)' 
+        style.transform = centers
+          ? 'translate(0, 0) scale(1)'
           : 'translate(0, 0) scale(0)';
         style.opacity = '0.25';
       }
