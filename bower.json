@@ -19,7 +19,7 @@
   "main": "paper-ripple.html",
   "dependencies": {
     "iron-a11y-keys-behavior": "PolymerElements/iron-a11y-keys-behavior#2.0-preview",
-    "polymer": "Polymer/polymer#2.0-preview"
+    "polymer": "Polymer/polymer#^2.0.0-rc.1"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#2.0-preview",
