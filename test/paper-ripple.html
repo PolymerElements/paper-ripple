@@ -249,6 +249,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             setTimeout(function() { done(); });
           });
           Polymer.dom(rippleContainer).appendChild(ripple);
+          // NOTE: shadydom will apply upgrades async for
+          // performance reasons webcomponents/shadydom#120
+          // Flush to force a synchronous update.
           window.ShadyDOM && window.ShadyDOM.flush();
           ripple.downAction();
           ripple.upAction();
