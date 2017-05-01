@@ -17,6 +17,7 @@
     "url": "git://github.com/PolymerElements/paper-ripple.git"
   },
   "main": "paper-ripple.html",
+  "ignore": [],
   "dependencies": {
     "iron-a11y-keys-behavior": "polymerelements/iron-a11y-keys-behavior#^1.1.5",
     "polymer": "Polymer/polymer#^1.1.0"
