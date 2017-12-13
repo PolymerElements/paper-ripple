@@ -1,6 +1,6 @@
 [![Build status](https://travis-ci.org/PolymerElements/paper-ripple.svg?branch=master)](https://travis-ci.org/PolymerElements/paper-ripple)
 
-##&lt;paper-ripple&gt;
+## &lt;paper-ripple&gt;
 
 Material design: [Surface reaction](https://www.google.com/design/spec/animation/responsive-interaction.html#responsive-interaction-surface-reaction)
 
