@@ -1,0 +1,10 @@
+{
+  "name": "@polymer/paper-ripple",
+  "private": true,
+  "description": "Adds a material design ripple to any container",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/PolymerElements/paper-ripple.git"
+  },
+  "license": "BSD-3-Clause"
+}
