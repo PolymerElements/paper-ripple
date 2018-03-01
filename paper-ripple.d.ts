@@ -69,7 +69,7 @@
  *     <paper-ripple class="circle"></paper-ripple>
  */
 interface PaperRippleElement extends Polymer.Element, Polymer.IronA11yKeysBehavior {
-  keyBindings: object|null;
+  keyBindings: object;
 
   /**
    * The initial opacity set on the wave.
