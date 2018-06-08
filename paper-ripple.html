@@ -67,6 +67,12 @@ You can also  center the ripple inside its container from the start.
 Apply `circle` class to make the rippling effect within a circle.
 
     <paper-ripple class="circle"></paper-ripple>
+    
+The following custom properties and mixins are also available for styling:
+
+Custom property | Description | Default
+----------------|-------------|----------
+`--paper-ripple` | Mixin applied to the paper ripple | `{}`
 
 @group Paper Elements
 @element paper-ripple
@@ -93,6 +99,8 @@ Apply `circle` class to make the rippling effect within a circle.
          * handler "interrupts" that event handler (which happens when the
          * ripple is created on demand) */
         pointer-events: none;
+        
+        @apply(--paper-ripple);
       }
 
       :host([animating]) {
