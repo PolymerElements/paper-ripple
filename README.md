@@ -50,7 +50,7 @@ npm install --save @polymer/paper-ripple
   </head>
   <body>
     <div style="position: relative">
-      <paper-ripple></paper-ripple>
+      <paper-ripple>Click here</paper-ripple>
     </div>
   </body>
 </html>
@@ -64,7 +64,7 @@ class SampleElement extends PolymerElement {
   static get template() {
     return html`
       <div style="position: relative">
-        <paper-ripple></paper-ripple>
+        <paper-ripple>Click here</paper-ripple>
       </div>
     `;
   }
