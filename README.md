@@ -7,29 +7,6 @@
 use to simulate a rippling effect emanating from the point of contact. The
 effect can be visualized as a concentric circle with motion.
 
-<!---
-```
-<custom-element-demo>
-  <template>
-    <script src="../webcomponentsjs/webcomponents-lite.js"></script>
-    <link rel="import" href="paper-ripple.html">
-    <style is="custom-style">
-      div {
-        height: 100px;
-        width: 100%;
-        box-shadow: 0 12px 15px 0 rgba(0, 0, 0, 0.24);
-      }
-      
-      paper-ripple {
-        color: #4285f4;
-      }
-    </style>
-    <next-code-block></next-code-block>
-  </template>
-</custom-element-demo>
-```
--->
-
 See: [Documentation](https://www.webcomponents.org/element/@polymer/paper-ripple),
   [Demo](https://www.webcomponents.org/element/@polymer/paper-ripple/demo/demo/index.html).
 
