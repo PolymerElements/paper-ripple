@@ -658,8 +658,11 @@ Polymer({
   },
 
   /**
-   * This conflicts with Element#antimate().
-   * https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
+   * Deprecated. Please use animateRipple() instead.
+   *
+   * This method name conflicts with Element#animate().
+   * https://developer.mozilla.org/en-US/docs/Web/API/Element/animate.
+   *
    * @suppress {checkTypes}
    */
   animate: function() {
@@ -686,6 +689,14 @@ Polymer({
     } else {
       window.requestAnimationFrame(this._boundAnimate);
     }
+  },
+
+  /**
+   * An alias for animate() whose name does not conflict with the platform
+   * Element.animate() method.
+   */
+  animateRipple: function() {
+    return this.animate();
   },
 
   _onEnterKeydown: function() {
