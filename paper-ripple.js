@@ -658,7 +658,7 @@ Polymer({
   },
 
   /**
-   * This conflicts with Element#antimate().
+   * This conflicts with Element#animate().
    * https://developer.mozilla.org/en-US/docs/Web/API/Element/animate
    * @suppress {checkTypes}
    */
@@ -686,6 +686,14 @@ Polymer({
     } else {
       window.requestAnimationFrame(this._boundAnimate);
     }
+  },
+
+  /**
+   * An alias for animate() whose name does not conflict with the platform
+   * Element.animate() method.
+   */
+  animateRipple: function() {
+    return this.animate();
   },
 
   _onEnterKeydown: function() {
