@@ -13,10 +13,10 @@
   "license": "BSD-3-Clause",
   "devDependencies": {
     "webmat": "^0.2.0",
-    "@polymer/iron-icon": "^3.0.0-pre.22",
-    "@polymer/iron-icons": "^3.0.0-pre.22",
-    "@polymer/iron-test-helpers": "^3.0.0-pre.22",
-    "@polymer/iron-demo-helpers": "^3.0.0-pre.22",
+    "@polymer/iron-icon": "^3.0.0-pre.24",
+    "@polymer/iron-icons": "^3.0.0-pre.24",
+    "@polymer/iron-test-helpers": "^3.0.0-pre.24",
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.24",
     "wct-browser-legacy": "^1.0.1",
     "@webcomponents/webcomponentsjs": "^2.0.0",
     "@polymer/gen-typescript-declarations": "^1.5.1"
@@ -30,7 +30,7 @@
   "main": "paper-ripple.js",
   "author": "The Polymer Authors",
   "dependencies": {
-    "@polymer/iron-a11y-keys-behavior": "^3.0.0-pre.22",
+    "@polymer/iron-a11y-keys-behavior": "^3.0.0-pre.24",
     "@polymer/polymer": "^3.0.0"
   }
 }
