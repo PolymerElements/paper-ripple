@@ -625,7 +625,7 @@ Polymer({
 
   onAnimationComplete: function() {
     this._animating = false;
-    this.$.background.style.backgroundColor = null;
+    this.$.background.style.backgroundColor = '';
     this.fire('transitionend');
   },
 
