@@ -353,6 +353,7 @@ Apply `circle` class to make the rippling effect within a circle.
 @demo demo/index.html
 */
 Polymer({
+  /** @override */
   _template: html`
     <style>
       :host {
@@ -431,8 +432,6 @@ Polymer({
   properties: {
     /**
      * The initial opacity set on the wave.
-     *
-     * @attribute initialOpacity
      * @type number
      * @default 0.25
      */
@@ -441,7 +440,6 @@ Polymer({
     /**
      * How fast (opacity per second) the wave fades out.
      *
-     * @attribute opacityDecayVelocity
      * @type number
      * @default 0.8
      */
@@ -451,7 +449,6 @@ Polymer({
      * If true, ripples will exhibit a gravitational pull towards
      * the center of their container as they fade away.
      *
-     * @attribute recenters
      * @type boolean
      * @default false
      */
@@ -460,7 +457,6 @@ Polymer({
     /**
      * If true, ripples will center inside its container
      *
-     * @attribute recenters
      * @type boolean
      * @default false
      */
@@ -469,7 +465,6 @@ Polymer({
     /**
      * A list of the visual ripples.
      *
-     * @attribute ripples
      * @type Array
      * @default []
      */
@@ -524,6 +519,7 @@ Polymer({
     'space:keyup': '_onSpaceKeyup'
   },
 
+  /** @override */
   attached: function() {
     // Set up a11yKeysBehavior to listen to key events on the target,
     // so that space and enter activate the ripple even if the target doesn't
@@ -538,6 +534,7 @@ Polymer({
     this.listen(keyEventTarget, 'down', 'uiDownAction');
   },
 
+  /** @override */
   detached: function() {
     this.unlisten(this.keyEventTarget, 'up', 'uiUpAction');
     this.unlisten(this.keyEventTarget, 'down', 'uiDownAction');
@@ -664,6 +661,7 @@ Polymer({
    * https://developer.mozilla.org/en-US/docs/Web/API/Element/animate.
    *
    * @suppress {checkTypes}
+   * @override
    */
   animate: function() {
     if (!this._animating) {
