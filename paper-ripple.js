@@ -347,9 +347,7 @@ Apply `circle` class to make the rippling effect within a circle.
 
     <paper-ripple class="circle"></paper-ripple>
 
-@group Paper Elements
 @element paper-ripple
-@hero hero.svg
 @demo demo/index.html
 */
 Polymer({
