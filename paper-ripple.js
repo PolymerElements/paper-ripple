@@ -284,7 +284,7 @@ Ripple.prototype = {
   },
 
   remove: function() {
-    dom(this.waveContainer.parentNode).removeChild(this.waveContainer);
+    dom(dom(this.waveContainer).parentNode).removeChild(this.waveContainer);
   }
 };
 
@@ -524,10 +524,10 @@ Polymer({
     // Set up a11yKeysBehavior to listen to key events on the target,
     // so that space and enter activate the ripple even if the target doesn't
     // handle key events. The key handlers deal with `noink` themselves.
-    if (this.parentNode.nodeType == 11) {  // DOCUMENT_FRAGMENT_NODE
+    if (dom(this).parentNode.nodeType == 11) {  // DOCUMENT_FRAGMENT_NODE
       this.keyEventTarget = dom(this).getOwnerRoot().host;
     } else {
-      this.keyEventTarget = this.parentNode;
+      this.keyEventTarget = dom(this).parentNode;
     }
     var keyEventTarget = /** @type {!EventTarget} */ (this.keyEventTarget);
     this.listen(keyEventTarget, 'up', 'uiUpAction');
